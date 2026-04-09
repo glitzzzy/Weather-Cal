@@ -1232,7 +1232,7 @@ const weatherCal = {
     reminderStack.url = (settingUrl.length > 0) ? settingUrl : "x-apple-reminderkit://REMCDReminder/"
 
     if (reminderSettings.showLabel) {
-      this.provideText((labelText || "Reminders").toUpperCase(), reminderStack, this.format.reminderLabel, true)
+      this.provideText((reminderSettings.sectionLabel || labelText || "Reminders").toUpperCase(), reminderStack, this.format.reminderLabel, true)
     }
 
     const numberOfReminders = reminderData.length
@@ -2421,6 +2421,11 @@ const weatherCal = {
           description: "Set to true to display a label above the reminders list.",
           type: "bool",
         },
+        sectionLabel: {
+          val: "Reminders",
+          name: "Section label text",
+          description: "The label shown above the reminders list when the label setting is enabled.",
+        },
         filterByTag: {
           val: "",
           name: "Filter reminders by tag",
@@ -2489,6 +2494,11 @@ const weatherCal = {
           name: "Show reminders label",
           description: "Set to true to display a label above the reminders list.",
           type: "bool",
+        },
+        sectionLabel: {
+          val: "Reminders 2",
+          name: "Section label text",
+          description: "The label shown above the second reminders list when the label setting is enabled.",
         },
         filterByTag: {
           val: "",
