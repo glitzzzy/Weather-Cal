@@ -848,7 +848,7 @@ const weatherCal = {
         if (!tags.some(tag => reminderTags.includes(tag))) { return false }
       }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
-      const dateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
+      const dateFilter = (reminderSettings.dueDateFilter != null && reminderSettings.dueDateFilter !== "") ? reminderSettings.dueDateFilter : (reminderSettings.todayOnly ? "today" : "all")
       if (dateFilter === "overdue") { return reminder.isOverdue }
       if (dateFilter === "today")   { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) == 0 }
       if (dateFilter === "future")  { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) > 0 }
