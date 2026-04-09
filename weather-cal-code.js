@@ -848,8 +848,11 @@ const weatherCal = {
         if (!tags.some(tag => reminderTags.includes(tag))) { return false }
       }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
+      const dateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
+      if (dateFilter === "overdue") { return reminder.isOverdue }
+      if (dateFilter === "today")   { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) == 0 }
+      if (dateFilter === "future")  { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) > 0 }
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
-      if (reminderSettings.todayOnly) { return this.dateDiff(reminder.dueDate, this.now) == 0 }
       return true
     }).slice(0,parseInt(reminderSettings.numberOfReminders))
   },
@@ -2455,7 +2458,15 @@ const weatherCal = {
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
+          description: "Deprecated — use 'Due date filter' instead. When enabled and no due date filter is set, only today's reminders are shown.",
           type: "bool",
+        },
+        dueDateFilter: {
+          val: "all",
+          name: "Due date filter",
+          description: "Filter reminders by when they are due. 'all' shows overdue, today, and future reminders (subject to the Show overdue and Hide after today settings). 'overdue' shows only overdue reminders. 'today' shows only reminders due today. 'future' shows only reminders due after today.",
+          type: "enum",
+          options: ["all","overdue","today","future"],
         },
         selectLists: {
           val: [],
@@ -2529,7 +2540,15 @@ const weatherCal = {
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
+          description: "Deprecated — use 'Due date filter' instead. When enabled and no due date filter is set, only today's reminders are shown.",
           type: "bool",
+        },
+        dueDateFilter: {
+          val: "all",
+          name: "Due date filter",
+          description: "Filter reminders by when they are due. 'all' shows overdue, today, and future reminders (subject to the Show overdue and Hide after today settings). 'overdue' shows only overdue reminders. 'today' shows only reminders due today. 'future' shows only reminders due after today.",
+          type: "enum",
+          options: ["all","overdue","today","future"],
         },
         selectLists: {
           val: [],
