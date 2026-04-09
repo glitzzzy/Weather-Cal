@@ -844,7 +844,7 @@ const weatherCal = {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
       if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
         const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
-        const reminderTags = (reminder.tags || []).map(t => t.toLowerCase().replace(/^#/, ""))
+        const reminderTags = (reminder.tags || []).map(t => (typeof t === "string" ? t : t.name).toLowerCase().replace(/^#/, ""))
         if (!tags.some(tag => reminderTags.includes(tag))) { return false }
       }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
