@@ -848,6 +848,7 @@ const weatherCal = {
         if (!tags.some(tag => reminderTags.includes(tag))) { return false }
       }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
+      if (reminderSettings.overdueOnly) { return reminder.isOverdue }
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
       if (reminderSettings.todayOnly) { return this.dateDiff(reminder.dueDate, this.now) == 0 }
       return true
@@ -2447,6 +2448,12 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
+        overdueOnly: {
+          val: false,
+          name: "Show only overdue reminders",
+          description: "Set to true to show only overdue reminders, hiding all non-overdue items.",
+          type: "bool",
+        },
 		overdueColor: {
 			val: "ff3b30",
 			name: "Overdue Color",
@@ -2519,6 +2526,12 @@ const weatherCal = {
         showOverdue: {
           val: false,
           name: "Show overdue reminders",
+          type: "bool",
+        },
+        overdueOnly: {
+          val: false,
+          name: "Show only overdue reminders",
+          description: "Set to true to show only overdue reminders, hiding all non-overdue items.",
           type: "bool",
         },
 		overdueColor: {
