@@ -802,7 +802,16 @@ const weatherCal = {
 
   // Set up the reminders data object.
   async setupReminders() {
-    const reminderSettings = this.settings.reminders
+    this.data.reminders = await this.fetchReminders(this.settings.reminders)
+  },
+
+  // Set up the second reminders data object.
+  async setupReminders2() {
+    this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
+  },
+
+  // Fetch and filter reminders according to the given reminder settings object.
+  async fetchReminders(reminderSettings) {
     let listSetting = reminderSettings.selectLists
     let lists
 
@@ -831,7 +840,7 @@ const weatherCal = {
       return 0 
     })
 
-    this.data.reminders = reminders.filter((reminder) => {
+    return reminders.filter((reminder) => {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
       if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
         const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
@@ -1107,6 +1116,11 @@ const weatherCal = {
       if (this[eventSettings.noEventBehavior]) { return await this[eventSettings.noEventBehavior](column) }
     }
 
+    if (eventSettings.showLabel && eventData.length > 0) {
+      const labelText = eventSettings.sectionLabel || "Events"
+      this.provideText(labelText.toUpperCase(), column, this.format.eventLabel, true)
+    }
+
     let currentStack
     let currentDiff = 0
     const numberOfEvents = eventData.length
@@ -1195,9 +1209,18 @@ const weatherCal = {
   // Display reminders on the widget.
   async reminders(column) {
     if (!this.data.reminders) { await this.setupReminders() }
-    const reminderSettings = this.settings.reminders
+    await this.renderReminders(column, this.settings.reminders, this.data.reminders, this.localization.remindersLabel)
+  },
 
-    if (this.data.reminders.length == 0) {
+  // Display a second set of reminders (with separate list/tag settings) on the widget.
+  async reminders2(column) {
+    if (!this.data.reminders2) { await this.setupReminders2() }
+    await this.renderReminders(column, this.settings.reminders2, this.data.reminders2, this.localization.reminders2Label)
+  },
+
+  // Shared rendering logic for a reminders list on the widget.
+  async renderReminders(column, reminderSettings, reminderData, labelText) {
+    if (reminderData.length == 0) {
       if (reminderSettings.noRemindersBehavior == "message" && this.localization.noRemindersMessage.length) { return this.provideText(this.localization.noRemindersMessage, column, this.format.noReminders, true) }
       if (this[reminderSettings.noRemindersBehavior]) { return await this[reminderSettings.noRemindersBehavior](column) }
     }
@@ -1209,16 +1232,15 @@ const weatherCal = {
     reminderStack.url = (settingUrl.length > 0) ? settingUrl : "x-apple-reminderkit://REMCDReminder/"
 
     if (reminderSettings.showLabel) {
-      const labelText = this.localization.remindersLabel || "Reminders"
-      this.provideText(labelText.toUpperCase(), reminderStack, this.format.reminderLabel, true)
+      this.provideText((labelText || "Reminders").toUpperCase(), reminderStack, this.format.reminderLabel, true)
     }
 
-    const numberOfReminders = this.data.reminders.length
+    const numberOfReminders = reminderData.length
     const showListColor = reminderSettings.showListColor
     const colorShape = showListColor.includes("circle") ? "circle" : "rectangle"
 
     for (let i = 0; i < numberOfReminders; i++) {
-      const reminder = this.data.reminders[i]
+      const reminder = reminderData[i]
 
       const titleStack = this.align(reminderStack)
       titleStack.layoutHorizontally()
@@ -2049,6 +2071,11 @@ const weatherCal = {
           name: "Reminders label",
           description: "The label shown above the reminders list when the label setting is enabled.",
         },
+        reminders2Label: {
+          val: "Reminders 2",
+          name: "Reminders 2 label",
+          description: "The label shown above the second reminders list when the label setting is enabled.",
+        },
         durationMinute: {
           val: "m",
           name: "Duration label for minutes",
@@ -2286,6 +2313,17 @@ const weatherCal = {
           type: "enum",
           options: ["message","greeting","none"],
         }, 
+        showLabel: {
+          val: false,
+          name: "Show section label",
+          description: "Set to true to display a label above the calendar events list.",
+          type: "bool",
+        },
+        sectionLabel: {
+          val: "Events",
+          name: "Section label text",
+          description: "The label shown above the calendar events list when the label setting is enabled.",
+        },
         url: {
           val: "",
           name: "URL to open when tapped",
@@ -2354,6 +2392,17 @@ const weatherCal = {
           type: "enum",
           options: ["message","greeting","none"],
         }, 
+        showLabel: {
+          val: false,
+          name: "Show section label",
+          description: "Set to true to display a label above the calendar events list.",
+          type: "bool",
+        },
+        sectionLabel: {
+          val: "Events 2",
+          name: "Section label text",
+          description: "The label shown above the calendar events list when the label setting is enabled.",
+        },
         url: {
           val: "",
           name: "URL to open when tapped",
@@ -2362,6 +2411,75 @@ const weatherCal = {
       },
       reminders: {
         name: "Reminders",
+        numberOfReminders: {
+          val: "3",
+          name: "Maximum number of reminders shown",
+        }, 
+        showLabel: {
+          val: false,
+          name: "Show reminders label",
+          description: "Set to true to display a label above the reminders list.",
+          type: "bool",
+        },
+        filterByTag: {
+          val: "",
+          name: "Filter reminders by tag",
+          description: "Enter a comma-separated list of tags to only show reminders that contain those tags (e.g. 'work' or '#work') in their title or notes. Leave blank to show all.",
+        },
+        useRelativeDueDate: {
+          val: false,
+          name: "Use relative dates",
+          description: "Set to true for a relative due date (in 3 hours) instead of absolute (3:00 PM).",
+          type: "bool",
+        },
+        showWithoutDueDate: {
+          val: false,
+          name: "Show reminders without a due date",
+          type: "bool",
+        },
+        showOverdue: {
+          val: false,
+          name: "Show overdue reminders",
+          type: "bool",
+        },
+		overdueColor: {
+			val: "ff3b30",
+			name: "Overdue Color",
+			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+		},
+        todayOnly: {
+          val: false,
+          name: "Hide reminders due after today",
+          type: "bool",
+        },
+        selectLists: {
+          val: [],
+          name: "Lists to show",
+          type: "multiselect",
+          options: await getFromCalendar(true),
+        }, 
+        showListColor: {
+          val: "rectangle left",
+          name: "Display list color",
+          description: "Choose the shape and location of the list color.",
+          type: "enum",
+          options: ["rectangle left","rectangle right","circle left","circle right","none"],
+        }, 
+        noRemindersBehavior: {
+          val: "none",
+          name: "Show when no reminders remain",
+          description: "When no reminders remain, show a hard-coded message, a time-based greeting, or nothing.",
+          type: "enum",
+          options: ["message","greeting","none"],
+        }, 
+        url: {
+          val: "",
+          name: "URL to open when tapped",
+          description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Reminders app.",
+        }, 
+      },
+      reminders2: {
+        name: "Reminders 2",
         numberOfReminders: {
           val: "3",
           name: "Maximum number of reminders shown",
