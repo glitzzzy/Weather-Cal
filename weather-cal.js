@@ -83,9 +83,9 @@ Script.setWidget(widget)
 
 // If we're in app, display the preview.
 if (config.runsInApp) {
-  if (preview == "small") { widget.presentSmall() }
-  else if (preview == "medium") { widget.presentMedium() }
-  else { widget.presentLarge() }
+  if (preview == "small") { await widget.presentSmall() }
+  else if (preview == "medium") { await widget.presentMedium() }
+  else { await widget.presentLarge() }
 }
 
 Script.complete()

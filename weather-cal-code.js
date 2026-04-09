@@ -2521,7 +2521,7 @@ if (moduleName == Script.name()) {
     const name = "Weather Cal Widget Builder"
     await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal-code.js")
     const w = await weatherCal.createWidget(layout, name, true)
-    w.presentLarge()
+    await w.presentLarge()
     Script.complete()
   })() 
 }
