@@ -6,7 +6,7 @@
 
 WEATHER CAL CONVERTER
 =====================
-   ~ by @mzeryck ~   
+   ~ by @glitzzzy ~   
 
 This script converts Scriptable widgets into Weather Cal widget items. Read this entire comment before you begin.
 
