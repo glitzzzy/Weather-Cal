@@ -844,8 +844,8 @@ const weatherCal = {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
       if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
         const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
-        const reminderText = ((reminder.title || "") + " " + (reminder.notes || "")).toLowerCase()
-        if (!tags.some(tag => reminderText.includes("#" + tag))) { return false }
+        const reminderTags = (reminder.tags || []).map(t => t.toLowerCase())
+        if (!tags.some(tag => reminderTags.includes(tag))) { return false }
       }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
@@ -2429,7 +2429,7 @@ const weatherCal = {
         filterByTag: {
           val: "",
           name: "Filter reminders by tag",
-          description: "Enter a comma-separated list of tags to only show reminders that contain those tags (e.g. 'work' or '#work') in their title or notes. Leave blank to show all.",
+          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
         },
         useRelativeDueDate: {
           val: false,
@@ -2503,7 +2503,7 @@ const weatherCal = {
         filterByTag: {
           val: "",
           name: "Filter reminders by tag",
-          description: "Enter a comma-separated list of tags to only show reminders that contain those tags (e.g. 'work' or '#work') in their title or notes. Leave blank to show all.",
+          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
         },
         useRelativeDueDate: {
           val: false,
