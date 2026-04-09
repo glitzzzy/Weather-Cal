@@ -844,14 +844,14 @@ const weatherCal = {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
       if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
         const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
-        const reminderTags = (reminder.tags || []).map(t => t.toLowerCase())
+        const reminderTags = (reminder.tags || []).map(t => t.toLowerCase().replace(/^#/, ""))
         if (!tags.some(tag => reminderTags.includes(tag))) { return false }
       }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
       const dateFilter = (reminderSettings.dueDateFilter != null && reminderSettings.dueDateFilter !== "") ? reminderSettings.dueDateFilter : (reminderSettings.todayOnly ? "today" : "all")
       if (dateFilter === "overdue") { return reminder.isOverdue }
       if (dateFilter === "today")   { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) == 0 }
-      if (dateFilter === "future")  { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) > 0 }
+      if (dateFilter === "future")  { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) < 0 }
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
       return true
     }).slice(0,parseInt(reminderSettings.numberOfReminders))
