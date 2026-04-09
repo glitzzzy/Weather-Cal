@@ -5,7 +5,7 @@
 /*
 
 This script contains the logic that allows Weather Cal to work. Please do not modify this file. You can add customizations in the widget script.
-Documentation is available at github.com/mzeryck/Weather-Cal
+Documentation is available at github.com/glitzzzy/Weather-Cal
 
 */
 
@@ -17,7 +17,7 @@ const weatherCal = {
     this.fm = iCloudInUse ? FileManager.iCloud() : FileManager.local()
     this.bgPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-" + this.name)
     this.prefPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-preferences-" + name)
-    this.widgetUrl = "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal.js"
+    this.widgetUrl = "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal.js"
     this.now = new Date()
     this.data = {}
     this.initialized = true
@@ -749,7 +749,16 @@ const weatherCal = {
 
   // Set up the event data object.
   async setupEvents() {
-    const eventSettings = this.settings.events
+    this.data.events = await this.fetchEvents(this.settings.events)
+  },
+
+  // Set up the second events data object.
+  async setupEvents2() {
+    this.data.events2 = await this.fetchEvents(this.settings.events2)
+  },
+
+  // Fetch and filter events according to the given event settings object.
+  async fetchEvents(eventSettings) {
     let calSetting = eventSettings.selectCalendars
     let calendars
 
@@ -773,7 +782,7 @@ const weatherCal = {
     endDate.setDate(this.now.getDate() + numberOfDays)
     const events = await CalendarEvent.between(this.now, endDate)
 
-    this.data.events = events.filter((event, index, array) => {
+    return events.filter((event, index, array) => {
       if (!(index == array.findIndex(t => t.identifier == event.identifier && t.startDate.getTime() == event.startDate.getTime()))) { return false }
 
       const diff = this.dateDiff(this.now, event.startDate)
@@ -824,6 +833,11 @@ const weatherCal = {
 
     this.data.reminders = reminders.filter((reminder) => {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
+      if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
+        const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
+        const reminderText = ((reminder.title || "") + " " + (reminder.notes || "")).toLowerCase()
+        if (!tags.some(tag => reminderText.includes("#" + tag))) { return false }
+      }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
       if (reminderSettings.todayOnly) { return this.dateDiff(reminder.dueDate, this.now) == 0 }
@@ -1075,10 +1089,19 @@ const weatherCal = {
   // Display events on the widget.
   async events(column) {
     if (!this.data.events) { await this.setupEvents() }
-    const eventSettings = this.settings.events
+    await this.renderEvents(column, this.settings.events, this.data.events)
+  },
 
+  // Display a second set of events (with separate calendar settings) on the widget.
+  async events2(column) {
+    if (!this.data.events2) { await this.setupEvents2() }
+    await this.renderEvents(column, this.settings.events2, this.data.events2)
+  },
+
+  // Shared rendering logic for an events list on the widget.
+  async renderEvents(column, eventSettings, eventData) {
     const settingUrlExists = (eventSettings.url || "").length > 0
-    if (this.data.events.length == 0) { 
+    if (eventData.length == 0) { 
       const secondsForToday = Math.floor(new Date().getTime() / 1000) - 978307200
       if (eventSettings.noEventBehavior == "message" && this.localization.noEventMessage.length) { return this.provideText(this.localization.noEventMessage, column, this.format.noEvents, true, settingUrlExists ? eventSettings.url : "calshow:" + secondsForToday) }
       if (this[eventSettings.noEventBehavior]) { return await this[eventSettings.noEventBehavior](column) }
@@ -1086,7 +1109,7 @@ const weatherCal = {
 
     let currentStack
     let currentDiff = 0
-    const numberOfEvents = this.data.events.length
+    const numberOfEvents = eventData.length
     const showCalendarColor = eventSettings.showCalendarColor
     const colorShape = showCalendarColor.includes("circle") ? "circle" : "rectangle"
     
@@ -1103,7 +1126,7 @@ const weatherCal = {
     makeEventStack(currentDiff,this.now)
 
     for (let i = 0; i < numberOfEvents; i++) {
-      const event = this.data.events[i]
+      const event = eventData[i]
       const diff = this.dateDiff(this.now, event.startDate)
 
       if (diff != currentDiff) {
@@ -1131,7 +1154,7 @@ const weatherCal = {
       const title = this.provideText(event.title.trim(), titleStack, this.format.eventTitle)
       const titlePadding = (showLocation || showTime) ? this.padding/5 : this.padding
       titleStack.setPadding(this.padding, this.padding, titlePadding, this.padding)
-      if (this.data.events.length >= 3) { title.lineLimit = 1 } // TODO: Make setting for this
+      if (numberOfEvents >= 3) { title.lineLimit = 1 } // TODO: Make setting for this
 
       if (showCalendarColor.length && showCalendarColor != "none" && showCalendarColor.includes("right")) {
         const colorItemText = " " + this.provideTextSymbol(colorShape)
@@ -1184,6 +1207,11 @@ const weatherCal = {
     reminderStack.setPadding(0, 0, 0, 0)
     const settingUrl = reminderSettings.url || ""
     reminderStack.url = (settingUrl.length > 0) ? settingUrl : "x-apple-reminderkit://REMCDReminder/"
+
+    if (reminderSettings.showLabel) {
+      const labelText = this.localization.remindersLabel || "Reminders"
+      this.provideText(labelText.toUpperCase(), reminderStack, this.format.reminderLabel, true)
+    }
 
     const numberOfReminders = this.data.reminders.length
     const showListColor = reminderSettings.showListColor
@@ -2016,6 +2044,11 @@ const weatherCal = {
           name: "No reminders message",
           description: "The message shown when there are no more reminders for the day, if that setting is active.",
         },
+        remindersLabel: {
+          val: "Reminders",
+          name: "Reminders label",
+          description: "The label shown above the reminders list when the label setting is enabled.",
+        },
         durationMinute: {
           val: "m",
           name: "Duration label for minutes",
@@ -2100,6 +2133,11 @@ const weatherCal = {
         noReminders:    {
           val: { size: "30", color: "", dark: "", font: "semibold", caps: "" },
           name: "No reminders message",
+          type: "fonts",
+        },
+        reminderLabel:  {
+          val: { size: "14", color: "", dark: "", font: "semibold", caps: "" },
+          name: "Reminders label",
           type: "fonts",
         },
         newsTitle:  {
@@ -2254,12 +2292,91 @@ const weatherCal = {
           description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Calendar app.",
         }, 
       },
+      events2: {
+        name: "Events 2",
+        numberOfEvents: {
+          val: "3",
+          name: "Maximum number of events shown",
+        }, 
+        minutesAfter: {
+          val: "5",
+          name: "Minutes after event begins",
+          description: "Number of minutes after an event begins that it should still be shown. Leave blank for an event to show for its duration.",
+        }, 
+        showAllDay: {
+          val: false,
+          name: "Show all-day events",
+          type: "bool",        
+        },
+        numberOfDays: {
+          val: "1",
+          name: "How many future days of events to show",
+          description: "How many days to show into the future. Set to 0 to show today's events only.",
+        }, 
+        labelFormat: {
+          val: "EEEE, MMMM d",
+          name: "Date format for future event days",
+        }, 
+        showTomorrow: {
+          val: "20",
+          name: "Future days shown at hour",
+          description: "The hour (in 24-hour time) to start showing events for tomorrow or beyond. Use 0 for always, 24 for never.",
+        }, 
+        showEventLength: {
+          val: "duration",
+          name: "Event length display style",
+          description: "Choose whether to show the duration, the end time, or no length information.",
+          type: "enum",
+          options: ["duration","time","none"],
+        }, 
+        showLocation: {
+          val: false,
+          name: "Show event location",
+          type: "bool",        
+        },
+        selectCalendars: {
+          val: [],
+          name: "Calendars to show",
+          type: "multiselect",
+          options: await getFromCalendar(),
+        }, 
+        showCalendarColor: {
+          val: "rectangle left",
+          name: "Display calendar color",
+          description: "Choose the shape and location of the calendar color.",
+          type: "enum",
+          options: ["rectangle left","rectangle right","circle left","circle right","none"],
+        }, 
+        noEventBehavior: {
+          val: "message",
+          name: "Show when no events remain",
+          description: "When no events remain, show a hard-coded message, a time-based greeting, or nothing.",
+          type: "enum",
+          options: ["message","greeting","none"],
+        }, 
+        url: {
+          val: "",
+          name: "URL to open when tapped",
+          description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Calendar app.",
+        }, 
+      },
       reminders: {
         name: "Reminders",
         numberOfReminders: {
           val: "3",
           name: "Maximum number of reminders shown",
         }, 
+        showLabel: {
+          val: false,
+          name: "Show reminders label",
+          description: "Set to true to display a label above the reminders list.",
+          type: "bool",
+        },
+        filterByTag: {
+          val: "",
+          name: "Filter reminders by tag",
+          description: "Enter a comma-separated list of tags to only show reminders that contain those tags (e.g. 'work' or '#work') in their title or notes. Leave blank to show all.",
+        },
         useRelativeDueDate: {
           val: false,
           name: "Use relative dates",
@@ -2519,9 +2636,9 @@ if (moduleName == Script.name()) {
       column
     `
     const name = "Weather Cal Widget Builder"
-    await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal-code.js")
+    await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal-code.js")
     const w = await weatherCal.createWidget(layout, name, true)
-    w.presentLarge()
+    await w.presentLarge()
     Script.complete()
   })() 
 }

@@ -43,7 +43,7 @@ const layout = `
 
 // Names of Weather Cal elements.
 const codeFilename = "weather-cal-code"
-const gitHubUrl = "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal-code.js"
+const gitHubUrl = "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal-code.js"
 
 // Determine if the user is using iCloud.
 let files = FileManager.local()
@@ -83,9 +83,9 @@ Script.setWidget(widget)
 
 // If we're in app, display the preview.
 if (config.runsInApp) {
-  if (preview == "small") { widget.presentSmall() }
-  else if (preview == "medium") { widget.presentMedium() }
-  else { widget.presentLarge() }
+  if (preview == "small") { await widget.presentSmall() }
+  else if (preview == "medium") { await widget.presentMedium() }
+  else { await widget.presentLarge() }
 }
 
 Script.complete()
