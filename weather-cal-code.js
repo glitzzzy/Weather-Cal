@@ -848,8 +848,11 @@ const weatherCal = {
         if (!tags.some(tag => reminderTags.includes(tag))) { return false }
       }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
-      if (reminder.isOverdue) { return reminderSettings.showOverdue }
-      if (reminderSettings.todayOnly) { return this.dateDiff(reminder.dueDate, this.now) == 0 }
+      const diff = this.dateDiff(reminder.dueDate, this.now)
+      const filter = reminderSettings.dueDateFilter || "all"
+      if (filter === "today")   { return diff === 0 }
+      if (filter === "overdue") { return reminder.isOverdue }
+      if (filter === "future")  { return diff < 0 }
       return true
     }).slice(0,parseInt(reminderSettings.numberOfReminders))
   },
@@ -2442,20 +2445,17 @@ const weatherCal = {
           name: "Show reminders without a due date",
           type: "bool",
         },
-        showOverdue: {
-          val: false,
-          name: "Show overdue reminders",
-          type: "bool",
-        },
 		overdueColor: {
 			val: "ff3b30",
 			name: "Overdue Color",
 			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
 		},
-        todayOnly: {
-          val: false,
-          name: "Hide reminders due after today",
-          type: "bool",
+        dueDateFilter: {
+          val: "all",
+          name: "Filter by due date",
+          description: "Choose which reminders to show based on their due date. 'all' shows overdue, today, and future reminders. 'today' shows only reminders due today. 'overdue' shows only overdue reminders. 'future' shows only reminders due after today.",
+          type: "enum",
+          options: ["all", "today", "overdue", "future"],
         },
         selectLists: {
           val: [],
@@ -2516,20 +2516,17 @@ const weatherCal = {
           name: "Show reminders without a due date",
           type: "bool",
         },
-        showOverdue: {
-          val: false,
-          name: "Show overdue reminders",
-          type: "bool",
-        },
 		overdueColor: {
 			val: "ff3b30",
 			name: "Overdue Color",
 			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
 		},
-        todayOnly: {
-          val: false,
-          name: "Hide reminders due after today",
-          type: "bool",
+        dueDateFilter: {
+          val: "all",
+          name: "Filter by due date",
+          description: "Choose which reminders to show based on their due date. 'all' shows overdue, today, and future reminders. 'today' shows only reminders due today. 'overdue' shows only overdue reminders. 'future' shows only reminders due after today.",
+          type: "enum",
+          options: ["all", "today", "overdue", "future"],
         },
         selectLists: {
           val: [],
