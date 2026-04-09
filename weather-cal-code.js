@@ -5,7 +5,7 @@
 /*
 
 This script contains the logic that allows Weather Cal to work. Please do not modify this file. You can add customizations in the widget script.
-Documentation is available at github.com/mzeryck/Weather-Cal
+Documentation is available at github.com/glitzzzy/Weather-Cal
 
 */
 
@@ -17,7 +17,7 @@ const weatherCal = {
     this.fm = iCloudInUse ? FileManager.iCloud() : FileManager.local()
     this.bgPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-" + this.name)
     this.prefPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-preferences-" + name)
-    this.widgetUrl = "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal.js"
+    this.widgetUrl = "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal.js"
     this.now = new Date()
     this.data = {}
     this.initialized = true
@@ -824,6 +824,11 @@ const weatherCal = {
 
     this.data.reminders = reminders.filter((reminder) => {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
+      if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
+        const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
+        const reminderText = ((reminder.title || "") + " " + (reminder.notes || "")).toLowerCase()
+        if (!tags.some(tag => reminderText.includes("#" + tag))) { return false }
+      }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
       if (reminderSettings.todayOnly) { return this.dateDiff(reminder.dueDate, this.now) == 0 }
@@ -1184,6 +1189,11 @@ const weatherCal = {
     reminderStack.setPadding(0, 0, 0, 0)
     const settingUrl = reminderSettings.url || ""
     reminderStack.url = (settingUrl.length > 0) ? settingUrl : "x-apple-reminderkit://REMCDReminder/"
+
+    if (reminderSettings.showLabel) {
+      const labelText = this.localization.remindersLabel || "Reminders"
+      this.provideText(labelText.toUpperCase(), reminderStack, this.format.reminderLabel, true)
+    }
 
     const numberOfReminders = this.data.reminders.length
     const showListColor = reminderSettings.showListColor
@@ -2016,6 +2026,11 @@ const weatherCal = {
           name: "No reminders message",
           description: "The message shown when there are no more reminders for the day, if that setting is active.",
         },
+        remindersLabel: {
+          val: "Reminders",
+          name: "Reminders label",
+          description: "The label shown above the reminders list when the label setting is enabled.",
+        },
         durationMinute: {
           val: "m",
           name: "Duration label for minutes",
@@ -2100,6 +2115,11 @@ const weatherCal = {
         noReminders:    {
           val: { size: "30", color: "", dark: "", font: "semibold", caps: "" },
           name: "No reminders message",
+          type: "fonts",
+        },
+        reminderLabel:  {
+          val: { size: "14", color: "", dark: "", font: "semibold", caps: "" },
+          name: "Reminders label",
           type: "fonts",
         },
         newsTitle:  {
@@ -2260,6 +2280,17 @@ const weatherCal = {
           val: "3",
           name: "Maximum number of reminders shown",
         }, 
+        showLabel: {
+          val: false,
+          name: "Show reminders label",
+          description: "Set to true to display a label above the reminders list.",
+          type: "bool",
+        },
+        filterByTag: {
+          val: "",
+          name: "Filter reminders by tag",
+          description: "Enter a comma-separated list of tags to only show reminders that contain those tags (e.g. 'work' or '#work') in their title or notes. Leave blank to show all.",
+        },
         useRelativeDueDate: {
           val: false,
           name: "Use relative dates",
@@ -2519,7 +2550,7 @@ if (moduleName == Script.name()) {
       column
     `
     const name = "Weather Cal Widget Builder"
-    await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal-code.js")
+    await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal-code.js")
     const w = await weatherCal.createWidget(layout, name, true)
     w.presentLarge()
     Script.complete()
