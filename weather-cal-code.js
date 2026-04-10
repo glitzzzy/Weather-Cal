@@ -1633,11 +1633,12 @@ const weatherCal = {
       weatherStack.setPadding(outsidePadding, this.padding, outsidePadding, this.padding)
     }
     
-    let startIndex = hourly ? 0 : (weatherSettings.showToday ? 1 : 2)
+    let startIndex = hourly ? 1 : (weatherSettings.showToday ? 1 : 2)
     let endIndex = (hourly ? parseInt(weatherSettings.showHours) : parseInt(weatherSettings.showDays)) + startIndex
     if (endIndex > 9) { endIndex = 9 }
 
     const myDate = new Date()
+    if (hourly) { myDate.setHours(myDate.getHours() + 1) }
     if (!hourly && startIndex == 1) { myDate.setDate(myDate.getDate() - 1) }
     const dateFormat = hourly ? weatherSettings.showHoursFormat : weatherSettings.showDaysFormat
     
@@ -3124,7 +3125,7 @@ const weatherCal = {
           type: "bool",
         },
         showHours: {
-          val: "3",
+          val: "6",
           name: "Number of hours shown in the hourly forecast item",
         }, 
         showHoursFormat: {
