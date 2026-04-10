@@ -17,6 +17,8 @@ const weatherCal = {
     this.fm = iCloudInUse ? FileManager.iCloud() : FileManager.local()
     this.bgPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-" + this.name)
     this.prefPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-preferences-" + name)
+    this.shortcutRemindersPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders-" + name)
+    this.shortcutReminders2Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders2-" + name)
     this.widgetUrl = "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal.js"
     this.now = new Date()
     this.data = {}
@@ -532,6 +534,22 @@ const weatherCal = {
   async createWidget(layout, name, iCloudInUse, custom) {
     if (!this.initialized) this.initialize(name, iCloudInUse)
 
+    // If invoked from Shortcuts with a reminder list, persist it for widget refreshes.
+    const shortcutParam = args.shortcutParameter
+    if (shortcutParam) {
+      try {
+        const parsed = JSON.parse(shortcutParam)
+        if (Array.isArray(parsed)) {
+          this.fm.writeString(this.shortcutRemindersPath, JSON.stringify(parsed))
+        } else if (parsed && Array.isArray(parsed.reminders)) {
+          this.fm.writeString(this.shortcutRemindersPath, JSON.stringify(parsed.reminders))
+          if (Array.isArray(parsed.reminders2)) {
+            this.fm.writeString(this.shortcutReminders2Path, JSON.stringify(parsed.reminders2))
+          }
+        }
+      } catch (e) {}
+    }
+
     // Determine if we're using the old or new setup.
     if (typeof layout == "object") {
       this.settings = layout
@@ -802,12 +820,41 @@ const weatherCal = {
 
   // Set up the reminders data object.
   async setupReminders() {
-    this.data.reminders = await this.fetchReminders(this.settings.reminders)
+    if (this.fm.fileExists(this.shortcutRemindersPath)) {
+      const raw = JSON.parse(this.fm.readString(this.shortcutRemindersPath))
+      this.data.reminders = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders.numberOfReminders))
+    } else {
+      this.data.reminders = await this.fetchReminders(this.settings.reminders)
+    }
   },
 
   // Set up the second reminders data object.
   async setupReminders2() {
-    this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
+    if (this.fm.fileExists(this.shortcutReminders2Path)) {
+      const raw = JSON.parse(this.fm.readString(this.shortcutReminders2Path))
+      this.data.reminders2 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
+    } else {
+      this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
+    }
+  },
+
+  // Convert a plain reminder object received from Shortcuts into the shape renderReminders expects.
+  parseShortcutReminder(obj) {
+    const dueDate = obj.dueDate ? new Date(obj.dueDate) : null
+    let calendarColor = Color.gray()
+    if (obj.calendarColor) { try { calendarColor = new Color(obj.calendarColor.replace(/^#/, "")) } catch (e) {} }
+    return {
+      title: obj.title || "",
+      dueDate: dueDate,
+      dueDateIncludesTime: obj.dueDateIncludesTime || false,
+      isOverdue: obj.isOverdue || (dueDate ? dueDate < this.now : false),
+      tags: obj.tags || [],
+      calendar: {
+        color: calendarColor,
+        title: obj.calendarTitle || "",
+        identifier: obj.calendarIdentifier || "",
+      },
+    }
   },
 
   // Fetch and filter reminders according to the given reminder settings object.
