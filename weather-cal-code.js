@@ -834,7 +834,7 @@ const weatherCal = {
   async setupReminders() {
     if (this.fm.fileExists(this.shortcutRemindersPath)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutRemindersPath))
-      this.data.reminders = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders.numberOfReminders))
+      this.data.reminders = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders).slice(0, parseInt(this.settings.reminders.numberOfReminders))
     } else {
       this.data.reminders = await this.fetchReminders(this.settings.reminders)
     }
@@ -844,7 +844,7 @@ const weatherCal = {
   async setupReminders2() {
     if (this.fm.fileExists(this.shortcutReminders2Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders2Path))
-      this.data.reminders2 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
+      this.data.reminders2 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders2).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
     } else {
       this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
     }
@@ -854,7 +854,7 @@ const weatherCal = {
   async setupReminders3() {
     if (this.fm.fileExists(this.shortcutReminders3Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders3Path))
-      this.data.reminders3 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
+      this.data.reminders3 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders3).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
     } else {
       this.data.reminders3 = await this.fetchReminders(this.settings.reminders3)
     }
@@ -864,7 +864,7 @@ const weatherCal = {
   async setupReminders4() {
     if (this.fm.fileExists(this.shortcutReminders4Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders4Path))
-      this.data.reminders4 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
+      this.data.reminders4 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders4).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
     } else {
       this.data.reminders4 = await this.fetchReminders(this.settings.reminders4)
     }
@@ -874,7 +874,7 @@ const weatherCal = {
   async setupReminders5() {
     if (this.fm.fileExists(this.shortcutReminders5Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders5Path))
-      this.data.reminders5 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
+      this.data.reminders5 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders5).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
     } else {
       this.data.reminders5 = await this.fetchReminders(this.settings.reminders5)
     }
@@ -897,6 +897,16 @@ const weatherCal = {
         identifier: obj.calendarIdentifier || "",
       },
     }
+  },
+
+  // Filter a list of parsed Shortcuts reminders by the filterByTag setting.
+  filterShortcutsByTag(reminders, reminderSettings) {
+    if (!reminderSettings.filterByTag || reminderSettings.filterByTag.trim().length === 0) return reminders
+    const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
+    return reminders.filter(reminder => {
+      const reminderTags = (reminder.tags || []).map(t => (typeof t === "string" ? t : t.name).toLowerCase().replace(/^#/, ""))
+      return tags.some(tag => reminderTags.includes(tag))
+    })
   },
 
   // Fetch and filter reminders according to the given reminder settings object.
@@ -1373,7 +1383,7 @@ const weatherCal = {
 
       if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "ff3b30") }
       const sectionDateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
-      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue"
+      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue" || (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0)
       if (reminder.isOverdue || !reminder.dueDate || dueDateRedundant) { continue }
 
       let timeText
