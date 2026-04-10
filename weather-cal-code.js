@@ -1004,7 +1004,7 @@ const weatherCal = {
       const dateFilter = (reminderSettings.dueDateFilter != null && reminderSettings.dueDateFilter !== "") ? reminderSettings.dueDateFilter : (reminderSettings.todayOnly ? "today" : "all")
       if (dateFilter === "overdue")   { return reminder.isOverdue }
       if (dateFilter === "today")     { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) == 0 }
-      if (dateFilter === "thisWeek")  { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) >= -6 && this.dateDiff(reminder.dueDate, this.now) <= 1 }
+      if (dateFilter === "thisWeek")  { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) >= -6 && this.dateDiff(reminder.dueDate, this.now) < 1 }
       if (dateFilter === "future")    { return !reminder.isOverdue && this.dateDiff(reminder.dueDate, this.now) < 0 }
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
       return true
