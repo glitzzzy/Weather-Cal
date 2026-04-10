@@ -763,6 +763,7 @@ const weatherCal = {
   row(input, parameter) {
     this.currentRow = this.widget.addStack()
     this.currentRow.layoutHorizontally()
+    this.currentRow.topAlignContent()
     this.currentRow.setPadding(0, 0, 0, 0)
     this.currentColumn.spacing = 0
     if (parameter) this.currentRow.size = new Size(0,parseInt(parameter))
