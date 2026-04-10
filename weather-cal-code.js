@@ -19,6 +19,9 @@ const weatherCal = {
     this.prefPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-preferences-" + name)
     this.shortcutRemindersPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders-" + name)
     this.shortcutReminders2Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders2-" + name)
+    this.shortcutReminders3Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders3-" + name)
+    this.shortcutReminders4Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders4-" + name)
+    this.shortcutReminders5Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders5-" + name)
     this.widgetUrl = "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal.js"
     this.now = new Date()
     this.data = {}
@@ -546,6 +549,15 @@ const weatherCal = {
           if (Array.isArray(parsed.reminders2)) {
             this.fm.writeString(this.shortcutReminders2Path, JSON.stringify(parsed.reminders2))
           }
+          if (Array.isArray(parsed.reminders3)) {
+            this.fm.writeString(this.shortcutReminders3Path, JSON.stringify(parsed.reminders3))
+          }
+          if (Array.isArray(parsed.reminders4)) {
+            this.fm.writeString(this.shortcutReminders4Path, JSON.stringify(parsed.reminders4))
+          }
+          if (Array.isArray(parsed.reminders5)) {
+            this.fm.writeString(this.shortcutReminders5Path, JSON.stringify(parsed.reminders5))
+          }
         }
       } catch (e) {}
     }
@@ -835,6 +847,36 @@ const weatherCal = {
       this.data.reminders2 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
     } else {
       this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
+    }
+  },
+
+  // Set up the third reminders data object.
+  async setupReminders3() {
+    if (this.fm.fileExists(this.shortcutReminders3Path)) {
+      const raw = JSON.parse(this.fm.readString(this.shortcutReminders3Path))
+      this.data.reminders3 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
+    } else {
+      this.data.reminders3 = await this.fetchReminders(this.settings.reminders3)
+    }
+  },
+
+  // Set up the fourth reminders data object.
+  async setupReminders4() {
+    if (this.fm.fileExists(this.shortcutReminders4Path)) {
+      const raw = JSON.parse(this.fm.readString(this.shortcutReminders4Path))
+      this.data.reminders4 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
+    } else {
+      this.data.reminders4 = await this.fetchReminders(this.settings.reminders4)
+    }
+  },
+
+  // Set up the fifth reminders data object.
+  async setupReminders5() {
+    if (this.fm.fileExists(this.shortcutReminders5Path)) {
+      const raw = JSON.parse(this.fm.readString(this.shortcutReminders5Path))
+      this.data.reminders5 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
+    } else {
+      this.data.reminders5 = await this.fetchReminders(this.settings.reminders5)
     }
   },
 
@@ -1266,6 +1308,24 @@ const weatherCal = {
   async reminders2(column) {
     if (!this.data.reminders2) { await this.setupReminders2() }
     await this.renderReminders(column, this.settings.reminders2, this.data.reminders2, this.localization.reminders2Label)
+  },
+
+  // Display a third set of reminders (with separate list/tag settings) on the widget.
+  async reminders3(column) {
+    if (!this.data.reminders3) { await this.setupReminders3() }
+    await this.renderReminders(column, this.settings.reminders3, this.data.reminders3, this.localization.reminders3Label)
+  },
+
+  // Display a fourth set of reminders (with separate list/tag settings) on the widget.
+  async reminders4(column) {
+    if (!this.data.reminders4) { await this.setupReminders4() }
+    await this.renderReminders(column, this.settings.reminders4, this.data.reminders4, this.localization.reminders4Label)
+  },
+
+  // Display a fifth set of reminders (with separate list/tag settings) on the widget.
+  async reminders5(column) {
+    if (!this.data.reminders5) { await this.setupReminders5() }
+    await this.renderReminders(column, this.settings.reminders5, this.data.reminders5, this.localization.reminders5Label)
   },
 
   // Shared rendering logic for a reminders list on the widget.
@@ -2128,6 +2188,21 @@ const weatherCal = {
           name: "Reminders 2 label",
           description: "The label shown above the second reminders list when the label setting is enabled.",
         },
+        reminders3Label: {
+          val: "Reminders 3",
+          name: "Reminders 3 label",
+          description: "The label shown above the third reminders list when the label setting is enabled.",
+        },
+        reminders4Label: {
+          val: "Reminders 4",
+          name: "Reminders 4 label",
+          description: "The label shown above the fourth reminders list when the label setting is enabled.",
+        },
+        reminders5Label: {
+          val: "Reminders 5",
+          name: "Reminders 5 label",
+          description: "The label shown above the fifth reminders list when the label setting is enabled.",
+        },
         durationMinute: {
           val: "m",
           name: "Duration label for minutes",
@@ -2301,7 +2376,7 @@ const weatherCal = {
 			val: "",
 			name: "URL to open when tapped",
 			description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Calendar app.",
-		},		
+        },		
       },
       events: {
         name: "Events",
@@ -2499,11 +2574,11 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
-		overdueColor: {
-			val: "ff3b30",
-			name: "Overdue Color",
-			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
-		},
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
@@ -2581,11 +2656,257 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
-		overdueColor: {
-			val: "ff3b30",
-			name: "Overdue Color",
-			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
-		},
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
+        todayOnly: {
+          val: false,
+          name: "Hide reminders due after today",
+          description: "Deprecated — use 'Due date filter' instead. When enabled and no due date filter is set, only today's reminders are shown.",
+          type: "bool",
+        },
+        dueDateFilter: {
+          val: "all",
+          name: "Due date filter",
+          description: "Filter reminders by when they are due. 'all' shows overdue, today, and future reminders (subject to the Show overdue and Hide after today settings). 'overdue' shows only overdue reminders. 'today' shows only reminders due today. 'future' shows only reminders due after today.",
+          type: "enum",
+          options: ["all","overdue","today","future"],
+        },
+        selectLists: {
+          val: [],
+          name: "Lists to show",
+          type: "multiselect",
+          options: await getFromCalendar(true),
+        }, 
+        showListColor: {
+          val: "rectangle left",
+          name: "Display list color",
+          description: "Choose the shape and location of the list color.",
+          type: "enum",
+          options: ["rectangle left","rectangle right","circle left","circle right","none"],
+        }, 
+        noRemindersBehavior: {
+          val: "none",
+          name: "Show when no reminders remain",
+          description: "When no reminders remain, show a hard-coded message, a time-based greeting, or nothing.",
+          type: "enum",
+          options: ["message","greeting","none"],
+        }, 
+        url: {
+          val: "",
+          name: "URL to open when tapped",
+          description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Reminders app.",
+        }, 
+      },
+      reminders3: {
+        name: "Reminders 3",
+        numberOfReminders: {
+          val: "3",
+          name: "Maximum number of reminders shown",
+        }, 
+        showLabel: {
+          val: false,
+          name: "Show reminders label",
+          description: "Set to true to display a label above the reminders list.",
+          type: "bool",
+        },
+        labelText: {
+          val: "",
+          name: "Reminders label text",
+          description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
+        },
+        filterByTag: {
+          val: "",
+          name: "Filter reminders by tag",
+          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        },
+        useRelativeDueDate: {
+          val: false,
+          name: "Use relative dates",
+          description: "Set to true for a relative due date (in 3 hours) instead of absolute (3:00 PM).",
+          type: "bool",
+        },
+        showWithoutDueDate: {
+          val: false,
+          name: "Show reminders without a due date",
+          type: "bool",
+        },
+        showOverdue: {
+          val: false,
+          name: "Show overdue reminders",
+          type: "bool",
+        },
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
+        todayOnly: {
+          val: false,
+          name: "Hide reminders due after today",
+          description: "Deprecated — use 'Due date filter' instead. When enabled and no due date filter is set, only today's reminders are shown.",
+          type: "bool",
+        },
+        dueDateFilter: {
+          val: "all",
+          name: "Due date filter",
+          description: "Filter reminders by when they are due. 'all' shows overdue, today, and future reminders (subject to the Show overdue and Hide after today settings). 'overdue' shows only overdue reminders. 'today' shows only reminders due today. 'future' shows only reminders due after today.",
+          type: "enum",
+          options: ["all","overdue","today","future"],
+        },
+        selectLists: {
+          val: [],
+          name: "Lists to show",
+          type: "multiselect",
+          options: await getFromCalendar(true),
+        }, 
+        showListColor: {
+          val: "rectangle left",
+          name: "Display list color",
+          description: "Choose the shape and location of the list color.",
+          type: "enum",
+          options: ["rectangle left","rectangle right","circle left","circle right","none"],
+        }, 
+        noRemindersBehavior: {
+          val: "none",
+          name: "Show when no reminders remain",
+          description: "When no reminders remain, show a hard-coded message, a time-based greeting, or nothing.",
+          type: "enum",
+          options: ["message","greeting","none"],
+        }, 
+        url: {
+          val: "",
+          name: "URL to open when tapped",
+          description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Reminders app.",
+        }, 
+      },
+      reminders4: {
+        name: "Reminders 4",
+        numberOfReminders: {
+          val: "3",
+          name: "Maximum number of reminders shown",
+        }, 
+        showLabel: {
+          val: false,
+          name: "Show reminders label",
+          description: "Set to true to display a label above the reminders list.",
+          type: "bool",
+        },
+        labelText: {
+          val: "",
+          name: "Reminders label text",
+          description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
+        },
+        filterByTag: {
+          val: "",
+          name: "Filter reminders by tag",
+          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        },
+        useRelativeDueDate: {
+          val: false,
+          name: "Use relative dates",
+          description: "Set to true for a relative due date (in 3 hours) instead of absolute (3:00 PM).",
+          type: "bool",
+        },
+        showWithoutDueDate: {
+          val: false,
+          name: "Show reminders without a due date",
+          type: "bool",
+        },
+        showOverdue: {
+          val: false,
+          name: "Show overdue reminders",
+          type: "bool",
+        },
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
+        todayOnly: {
+          val: false,
+          name: "Hide reminders due after today",
+          description: "Deprecated — use 'Due date filter' instead. When enabled and no due date filter is set, only today's reminders are shown.",
+          type: "bool",
+        },
+        dueDateFilter: {
+          val: "all",
+          name: "Due date filter",
+          description: "Filter reminders by when they are due. 'all' shows overdue, today, and future reminders (subject to the Show overdue and Hide after today settings). 'overdue' shows only overdue reminders. 'today' shows only reminders due today. 'future' shows only reminders due after today.",
+          type: "enum",
+          options: ["all","overdue","today","future"],
+        },
+        selectLists: {
+          val: [],
+          name: "Lists to show",
+          type: "multiselect",
+          options: await getFromCalendar(true),
+        }, 
+        showListColor: {
+          val: "rectangle left",
+          name: "Display list color",
+          description: "Choose the shape and location of the list color.",
+          type: "enum",
+          options: ["rectangle left","rectangle right","circle left","circle right","none"],
+        }, 
+        noRemindersBehavior: {
+          val: "none",
+          name: "Show when no reminders remain",
+          description: "When no reminders remain, show a hard-coded message, a time-based greeting, or nothing.",
+          type: "enum",
+          options: ["message","greeting","none"],
+        }, 
+        url: {
+          val: "",
+          name: "URL to open when tapped",
+          description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Reminders app.",
+        }, 
+      },
+      reminders5: {
+        name: "Reminders 5",
+        numberOfReminders: {
+          val: "3",
+          name: "Maximum number of reminders shown",
+        }, 
+        showLabel: {
+          val: false,
+          name: "Show reminders label",
+          description: "Set to true to display a label above the reminders list.",
+          type: "bool",
+        },
+        labelText: {
+          val: "",
+          name: "Reminders label text",
+          description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
+        },
+        filterByTag: {
+          val: "",
+          name: "Filter reminders by tag",
+          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        },
+        useRelativeDueDate: {
+          val: false,
+          name: "Use relative dates",
+          description: "Set to true for a relative due date (in 3 hours) instead of absolute (3:00 PM).",
+          type: "bool",
+        },
+        showWithoutDueDate: {
+          val: false,
+          name: "Show reminders without a due date",
+          type: "bool",
+        },
+        showOverdue: {
+          val: false,
+          name: "Show overdue reminders",
+          type: "bool",
+        },
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
