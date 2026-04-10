@@ -632,15 +632,15 @@ const weatherCal = {
     this.widget.setPadding(topPad, leftPad, bottomPad, rightPad)
 
     // Background setup.
-    const background = JSON.parse(this.fm.readString(this.bgPath))
+    const background = this.fm.fileExists(this.bgPath) ? JSON.parse(this.fm.readString(this.bgPath)) : {}
 
     if (custom && custom.background) {
       await custom.background(this.widget)
 
-    } else if (background.type == "color") {
+    } else if (background && background.type == "color") {
       this.widget.backgroundColor = this.provideColor(background)
 
-    } else if (background.type == "auto") {
+    } else if (background && background.type == "auto") {
       const gradient = new LinearGradient()
       const gradientSettings = await this.setupGradient()
 
@@ -648,7 +648,7 @@ const weatherCal = {
       gradient.locations = gradientSettings.position()
       this.widget.backgroundGradient = gradient
 
-    } else if (background.type == "gradient") {
+    } else if (background && background.type == "gradient") {
       const gradient = new LinearGradient()
       const initialColor = this.provideColor({ color: background.initialColor, dark: background.initialDark })
       const finalColor = this.provideColor({ color: background.finalColor, dark: background.finalDark })
@@ -657,7 +657,7 @@ const weatherCal = {
       gradient.locations = [0, 1]
       this.widget.backgroundGradient = gradient
 
-    } else if (background.type == "image") {
+    } else if (background && background.type == "image") {
       const extension = (this.darkMode && background.dark && !this.settings.widget.instantDark ? " (Dark)" : "") + ".jpg"
       const imagePath = this.fm.joinPath(this.fm.joinPath(this.fm.documentsDirectory(), "Weather Cal"), name + extension)
 
@@ -1431,7 +1431,7 @@ const weatherCal = {
       if (showListColor.length && showListColor != "none" && !showListColor.includes("right")) {
         let colorItemText = this.provideTextSymbol(colorShape) + " "
         let colorItem = this.provideText(colorItemText, titleStack, this.format.reminderTitle)
-        colorItem.textColor = reminder.calendar.color
+        colorItem.textColor = (reminder.calendar && reminder.calendar.color) ? reminder.calendar.color : new Color("E85D75")
       }
 
       const title = this.provideText(reminder.title.trim(), titleStack, this.format.reminderTitle)
@@ -1440,7 +1440,7 @@ const weatherCal = {
       if (showListColor.length && showListColor != "none" && showListColor.includes("right")) {
         let colorItemText = " " + this.provideTextSymbol(colorShape)
         let colorItem = this.provideText(colorItemText, titleStack, this.format.reminderTitle)
-        colorItem.textColor = reminder.calendar.color
+        colorItem.textColor = (reminder.calendar && reminder.calendar.color) ? reminder.calendar.color : new Color("E85D75")
       }
 
       if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "E85D75") }
