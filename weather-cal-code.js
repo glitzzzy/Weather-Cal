@@ -814,6 +814,10 @@ const weatherCal = {
   async fetchReminders(reminderSettings) {
     let listSetting = reminderSettings.selectLists
     let lists
+    
+    for (let r of reminders) {
+  console.log(r.title, r.tags)
+}
 
     // Old, manually-entered comma lists.
     if (typeof listSetting == "string") {
