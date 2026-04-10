@@ -1139,6 +1139,10 @@ const weatherCal = {
 
     this.data.weather.tomorrowRain = weatherData ? weatherData.daily[1].pop * 100 : null
     this.data.weather.nextHourRain = weatherData ? weatherData.hourly[1].pop * 100 : null
+    this.data.weather.feelsLike = weatherData ? weatherData.current.feels_like : null
+    this.data.weather.dewPoint = weatherData ? weatherData.current.dew_point : null
+    this.data.weather.uvIndex = weatherData ? weatherData.current.uvi : null
+    this.data.weather.currentRainChance = weatherData ? weatherData.hourly[0].pop * 100 : null
   },
 
   // Set up the COVID data object.
@@ -1785,6 +1789,90 @@ const weatherCal = {
 
   // Allow for either term to be used.
   async sunset(column) { return await this.sunrise(column, true) },
+
+  // Display the current feels like temperature.
+  async feelsLike(column) {
+    if (!this.data.weather) { await this.setupWeather() }
+    const weatherData = this.data.weather
+
+    const stack = this.align(column)
+    stack.setPadding(this.padding/2, this.padding, this.padding/2, this.padding)
+    stack.layoutHorizontally()
+    stack.centerAlignContent()
+
+    stack.addSpacer(this.padding * 0.3)
+
+    const icon = stack.addImage(SFSymbol.named("thermometer").image)
+    icon.imageSize = new Size(18,18)
+    this.tintIcon(icon, this.format.smallTemp, true)
+
+    stack.addSpacer(this.padding)
+
+    this.provideText(this.localization.feelsLikeLabel + ": " + this.displayNumber(weatherData.feelsLike,"--") + "°", stack, this.format.smallTemp)
+  },
+
+  // Display the current dew point.
+  async dewPoint(column) {
+    if (!this.data.weather) { await this.setupWeather() }
+    const weatherData = this.data.weather
+
+    const stack = this.align(column)
+    stack.setPadding(this.padding/2, this.padding, this.padding/2, this.padding)
+    stack.layoutHorizontally()
+    stack.centerAlignContent()
+
+    stack.addSpacer(this.padding * 0.3)
+
+    const icon = stack.addImage(SFSymbol.named("drop").image)
+    icon.imageSize = new Size(18,18)
+    this.tintIcon(icon, this.format.smallTemp, true)
+
+    stack.addSpacer(this.padding)
+
+    this.provideText(this.localization.dewPointLabel + ": " + this.displayNumber(weatherData.dewPoint,"--") + "°", stack, this.format.smallTemp)
+  },
+
+  // Display the current chance of rain.
+  async chanceOfRain(column) {
+    if (!this.data.weather) { await this.setupWeather() }
+    const weatherData = this.data.weather
+
+    const stack = this.align(column)
+    stack.setPadding(this.padding/2, this.padding, this.padding/2, this.padding)
+    stack.layoutHorizontally()
+    stack.centerAlignContent()
+
+    stack.addSpacer(this.padding * 0.3)
+
+    const icon = stack.addImage(SFSymbol.named("umbrella").image)
+    icon.imageSize = new Size(18,18)
+    this.tintIcon(icon, this.format.smallTemp, true)
+
+    stack.addSpacer(this.padding)
+
+    this.provideText(this.localization.chanceOfRainLabel + ": " + this.displayNumber(weatherData.currentRainChance,"--") + "%", stack, this.format.smallTemp)
+  },
+
+  // Display the current UV index.
+  async uvIndex(column) {
+    if (!this.data.weather) { await this.setupWeather() }
+    const weatherData = this.data.weather
+
+    const stack = this.align(column)
+    stack.setPadding(this.padding/2, this.padding, this.padding/2, this.padding)
+    stack.layoutHorizontally()
+    stack.centerAlignContent()
+
+    stack.addSpacer(this.padding * 0.3)
+
+    const icon = stack.addImage(SFSymbol.named("sun.max").image)
+    icon.imageSize = new Size(18,18)
+    this.tintIcon(icon, this.format.smallTemp, true)
+
+    stack.addSpacer(this.padding)
+
+    this.provideText(this.localization.uvIndexLabel + ": " + this.displayNumber(weatherData.uvIndex,"--"), stack, this.format.smallTemp)
+  },
   
   // Display COVID info on the widget.
   async covid(column) {
@@ -2300,6 +2388,22 @@ const weatherCal = {
         week: {
           val: "Week",
           name: "Label for the week number",
+        },
+        feelsLikeLabel: {
+          val: "Feels like",
+          name: "Label for the feels like temperature item",
+        },
+        dewPointLabel: {
+          val: "Dew point",
+          name: "Label for the dew point item",
+        },
+        chanceOfRainLabel: {
+          val: "Chance of rain",
+          name: "Label for the chance of rain item",
+        },
+        uvIndexLabel: {
+          val: "UV index",
+          name: "Label for the UV index item",
         },
       },
       font: {
