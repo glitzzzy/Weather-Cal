@@ -1265,7 +1265,9 @@ const weatherCal = {
       }
 
       if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "ff3b30") }
-      if (reminder.isOverdue || !reminder.dueDate) { continue }
+      const sectionDateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
+      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue"
+      if (reminder.isOverdue || !reminder.dueDate || dueDateRedundant) { continue }
 
       let timeText
       if (reminderSettings.useRelativeDueDate) {
