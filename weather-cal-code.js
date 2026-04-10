@@ -840,7 +840,7 @@ const weatherCal = {
       return 0 
     })
 
-    return reminders.filter((reminder) => {
+    const filtered = reminders.filter((reminder) => {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
       if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
         const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
@@ -855,6 +855,17 @@ const weatherCal = {
       if (reminder.isOverdue) { return reminderSettings.showOverdue }
       return true
     }).slice(0,parseInt(reminderSettings.numberOfReminders))
+
+    const debugLog = []
+    for (let r of reminders) {
+      debugLog.push(`${r.title} | tags: ${JSON.stringify(r.tags)}`)
+    }
+    const n = new Notification()
+    n.title = "WeatherCal Reminder Debug"
+    n.body = debugLog.join("\n")
+    await n.schedule()
+
+    return filtered
   },
 
   // Set up the gradient for the widget background.
@@ -1265,7 +1276,8 @@ const weatherCal = {
       }
 
       if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "ff3b30") }
-      if (reminder.isOverdue || !reminder.dueDate) { continue }
+      const dateFilter = (reminderSettings.dueDateFilter != null && reminderSettings.dueDateFilter !== "") ? reminderSettings.dueDateFilter : (reminderSettings.todayOnly ? "today" : "all")
+      if (reminder.isOverdue || !reminder.dueDate || dateFilter === "today" || dateFilter === "overdue") { continue }
 
       let timeText
       if (reminderSettings.useRelativeDueDate) {
