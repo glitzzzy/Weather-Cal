@@ -834,7 +834,7 @@ const weatherCal = {
   async setupReminders() {
     if (this.settings.reminders.useShortcutReminders && this.fm.fileExists(this.shortcutRemindersPath)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutRemindersPath))
-      this.data.reminders = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders).slice(0, parseInt(this.settings.reminders.numberOfReminders))
+      this.data.reminders = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders.numberOfReminders))
     } else {
       this.data.reminders = await this.fetchReminders(this.settings.reminders)
     }
@@ -844,7 +844,7 @@ const weatherCal = {
   async setupReminders2() {
     if (this.settings.reminders2.useShortcutReminders && this.fm.fileExists(this.shortcutReminders2Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders2Path))
-      this.data.reminders2 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders2).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
+      this.data.reminders2 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
     } else {
       this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
     }
@@ -854,7 +854,7 @@ const weatherCal = {
   async setupReminders3() {
     if (this.settings.reminders3.useShortcutReminders && this.fm.fileExists(this.shortcutReminders3Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders3Path))
-      this.data.reminders3 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders3).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
+      this.data.reminders3 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
     } else {
       this.data.reminders3 = await this.fetchReminders(this.settings.reminders3)
     }
@@ -864,7 +864,7 @@ const weatherCal = {
   async setupReminders4() {
     if (this.settings.reminders4.useShortcutReminders && this.fm.fileExists(this.shortcutReminders4Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders4Path))
-      this.data.reminders4 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders4).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
+      this.data.reminders4 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
     } else {
       this.data.reminders4 = await this.fetchReminders(this.settings.reminders4)
     }
@@ -874,7 +874,7 @@ const weatherCal = {
   async setupReminders5() {
     if (this.settings.reminders5.useShortcutReminders && this.fm.fileExists(this.shortcutReminders5Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders5Path))
-      this.data.reminders5 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders5).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
+      this.data.reminders5 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
     } else {
       this.data.reminders5 = await this.fetchReminders(this.settings.reminders5)
     }
@@ -897,16 +897,6 @@ const weatherCal = {
         identifier: obj.calendarIdentifier || "",
       },
     }
-  },
-
-  // Filter a list of parsed Shortcuts reminders by the filterByTag setting.
-  filterShortcutsByTag(reminders, reminderSettings) {
-    if (!reminderSettings.filterByTag || reminderSettings.filterByTag.trim().length === 0) return reminders
-    const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
-    return reminders.filter(reminder => {
-      const reminderTags = (reminder.tags || []).map(t => (typeof t === "string" ? t : t.name).toLowerCase().replace(/^#/, ""))
-      return tags.some(tag => reminderTags.includes(tag))
-    })
   },
 
   // Fetch and filter reminders according to the given reminder settings object.
@@ -941,11 +931,6 @@ const weatherCal = {
 
     return reminders.filter((reminder) => {
       if (lists.length && !(lists.some(a => a.identifier == reminder.calendar.identifier) || lists.includes(reminder.calendar.title))) { return false }
-      if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
-        const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
-        const reminderTags = (reminder.tags || []).map(t => (typeof t === "string" ? t : t.name).toLowerCase().replace(/^#/, ""))
-        if (!tags.some(tag => reminderTags.includes(tag))) { return false }
-      }
       if (!reminder.dueDate)  { return reminderSettings.showWithoutDueDate }
       const dateFilter = (reminderSettings.dueDateFilter != null && reminderSettings.dueDateFilter !== "") ? reminderSettings.dueDateFilter : (reminderSettings.todayOnly ? "today" : "all")
       if (dateFilter === "overdue") { return reminder.isOverdue }
@@ -1383,8 +1368,8 @@ const weatherCal = {
 
       if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "ff3b30") }
       const sectionDateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
-      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue" || (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0)
-      if (reminder.isOverdue || !reminder.dueDate || dueDateRedundant) { continue }
+      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue"
+      if (reminderSettings.showDates === false || reminder.isOverdue || !reminder.dueDate || dueDateRedundant) { continue }
 
       let timeText
       if (reminderSettings.useRelativeDueDate) {
@@ -2563,10 +2548,11 @@ const weatherCal = {
           name: "Reminders label text",
           description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
         },
-        filterByTag: {
-          val: "",
-          name: "Filter reminders by tag",
-          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        showDates: {
+          val: true,
+          name: "Show dates",
+          description: "Set to false to hide the due date/time shown below each reminder.",
+          type: "bool",
         },
         useRelativeDueDate: {
           val: false,
@@ -2623,7 +2609,7 @@ const weatherCal = {
           options: ["message","greeting","none"],
         }, 
         useShortcutReminders: {
-          val: true,
+          val: false,
           name: "Use reminders from Shortcuts JSON",
           description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
           type: "bool",
@@ -2651,10 +2637,11 @@ const weatherCal = {
           name: "Reminders label text",
           description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
         },
-        filterByTag: {
-          val: "",
-          name: "Filter reminders by tag",
-          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        showDates: {
+          val: true,
+          name: "Show dates",
+          description: "Set to false to hide the due date/time shown below each reminder.",
+          type: "bool",
         },
         useRelativeDueDate: {
           val: false,
@@ -2711,7 +2698,7 @@ const weatherCal = {
           options: ["message","greeting","none"],
         }, 
         useShortcutReminders: {
-          val: true,
+          val: false,
           name: "Use reminders from Shortcuts JSON",
           description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
           type: "bool",
@@ -2739,10 +2726,11 @@ const weatherCal = {
           name: "Reminders label text",
           description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
         },
-        filterByTag: {
-          val: "",
-          name: "Filter reminders by tag",
-          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        showDates: {
+          val: true,
+          name: "Show dates",
+          description: "Set to false to hide the due date/time shown below each reminder.",
+          type: "bool",
         },
         useRelativeDueDate: {
           val: false,
@@ -2799,7 +2787,7 @@ const weatherCal = {
           options: ["message","greeting","none"],
         }, 
         useShortcutReminders: {
-          val: true,
+          val: false,
           name: "Use reminders from Shortcuts JSON",
           description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
           type: "bool",
@@ -2827,10 +2815,11 @@ const weatherCal = {
           name: "Reminders label text",
           description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
         },
-        filterByTag: {
-          val: "",
-          name: "Filter reminders by tag",
-          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        showDates: {
+          val: true,
+          name: "Show dates",
+          description: "Set to false to hide the due date/time shown below each reminder.",
+          type: "bool",
         },
         useRelativeDueDate: {
           val: false,
@@ -2887,7 +2876,7 @@ const weatherCal = {
           options: ["message","greeting","none"],
         }, 
         useShortcutReminders: {
-          val: true,
+          val: false,
           name: "Use reminders from Shortcuts JSON",
           description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
           type: "bool",
@@ -2915,10 +2904,11 @@ const weatherCal = {
           name: "Reminders label text",
           description: "The name shown above this reminders section when the label is enabled. Leave blank to use the default from the Localization settings.",
         },
-        filterByTag: {
-          val: "",
-          name: "Filter reminders by tag",
-          description: "Enter a comma-separated list of tags to only show reminders that have those tags assigned in the Reminders app (e.g. 'work' or '#work'). Leave blank to show all.",
+        showDates: {
+          val: true,
+          name: "Show dates",
+          description: "Set to false to hide the due date/time shown below each reminder.",
+          type: "bool",
         },
         useRelativeDueDate: {
           val: false,
@@ -2975,7 +2965,7 @@ const weatherCal = {
           options: ["message","greeting","none"],
         }, 
         useShortcutReminders: {
-          val: true,
+          val: false,
           name: "Use reminders from Shortcuts JSON",
           description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
           type: "bool",
