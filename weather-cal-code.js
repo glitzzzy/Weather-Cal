@@ -3268,9 +3268,18 @@ if (moduleName == Script.name()) {
       column
     `
     const name = "Weather Cal Widget Builder"
-    await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal-code.js")
+    let preview
+    if (config.runsInApp && !args.shortcutParameter) {
+      preview = await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal-code.js")
+      if (!preview) return
+    }
     const w = await weatherCal.createWidget(layout, name, true)
-    await w.presentLarge()
+    Script.setWidget(w)
+    if (config.runsInApp && preview) {
+      if (preview == "small") { await w.presentSmall() }
+      else if (preview == "medium") { await w.presentMedium() }
+      else { await w.presentLarge() }
+    }
     Script.complete()
   })() 
 }
