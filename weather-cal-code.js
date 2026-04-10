@@ -832,7 +832,7 @@ const weatherCal = {
 
   // Set up the reminders data object.
   async setupReminders() {
-    if (this.fm.fileExists(this.shortcutRemindersPath)) {
+    if (this.settings.reminders.useShortcutReminders && this.fm.fileExists(this.shortcutRemindersPath)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutRemindersPath))
       this.data.reminders = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders).slice(0, parseInt(this.settings.reminders.numberOfReminders))
     } else {
@@ -842,7 +842,7 @@ const weatherCal = {
 
   // Set up the second reminders data object.
   async setupReminders2() {
-    if (this.fm.fileExists(this.shortcutReminders2Path)) {
+    if (this.settings.reminders2.useShortcutReminders && this.fm.fileExists(this.shortcutReminders2Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders2Path))
       this.data.reminders2 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders2).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
     } else {
@@ -852,7 +852,7 @@ const weatherCal = {
 
   // Set up the third reminders data object.
   async setupReminders3() {
-    if (this.fm.fileExists(this.shortcutReminders3Path)) {
+    if (this.settings.reminders3.useShortcutReminders && this.fm.fileExists(this.shortcutReminders3Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders3Path))
       this.data.reminders3 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders3).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
     } else {
@@ -862,7 +862,7 @@ const weatherCal = {
 
   // Set up the fourth reminders data object.
   async setupReminders4() {
-    if (this.fm.fileExists(this.shortcutReminders4Path)) {
+    if (this.settings.reminders4.useShortcutReminders && this.fm.fileExists(this.shortcutReminders4Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders4Path))
       this.data.reminders4 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders4).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
     } else {
@@ -872,7 +872,7 @@ const weatherCal = {
 
   // Set up the fifth reminders data object.
   async setupReminders5() {
-    if (this.fm.fileExists(this.shortcutReminders5Path)) {
+    if (this.settings.reminders5.useShortcutReminders && this.fm.fileExists(this.shortcutReminders5Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders5Path))
       this.data.reminders5 = this.filterShortcutsByTag(raw.map(r => this.parseShortcutReminder(r)), this.settings.reminders5).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
     } else {
@@ -2622,6 +2622,12 @@ const weatherCal = {
           type: "enum",
           options: ["message","greeting","none"],
         }, 
+        useShortcutReminders: {
+          val: true,
+          name: "Use reminders from Shortcuts JSON",
+          description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
+          type: "bool",
+        },
         url: {
           val: "",
           name: "URL to open when tapped",
@@ -2704,6 +2710,12 @@ const weatherCal = {
           type: "enum",
           options: ["message","greeting","none"],
         }, 
+        useShortcutReminders: {
+          val: true,
+          name: "Use reminders from Shortcuts JSON",
+          description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
+          type: "bool",
+        },
         url: {
           val: "",
           name: "URL to open when tapped",
@@ -2786,6 +2798,12 @@ const weatherCal = {
           type: "enum",
           options: ["message","greeting","none"],
         }, 
+        useShortcutReminders: {
+          val: true,
+          name: "Use reminders from Shortcuts JSON",
+          description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
+          type: "bool",
+        },
         url: {
           val: "",
           name: "URL to open when tapped",
@@ -2868,6 +2886,12 @@ const weatherCal = {
           type: "enum",
           options: ["message","greeting","none"],
         }, 
+        useShortcutReminders: {
+          val: true,
+          name: "Use reminders from Shortcuts JSON",
+          description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
+          type: "bool",
+        },
         url: {
           val: "",
           name: "URL to open when tapped",
@@ -2950,6 +2974,12 @@ const weatherCal = {
           type: "enum",
           options: ["message","greeting","none"],
         }, 
+        useShortcutReminders: {
+          val: true,
+          name: "Use reminders from Shortcuts JSON",
+          description: "When enabled, uses the reminders list provided via the Shortcuts JSON parameter instead of fetching from the Reminders app.",
+          type: "bool",
+        },
         url: {
           val: "",
           name: "URL to open when tapped",
