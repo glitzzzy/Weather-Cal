@@ -1275,6 +1275,8 @@ const weatherCal = {
 
     if (eventSettings.showLabel && eventData.length > 0) {
       const labelText = eventSettings.sectionLabel || "Events"
+      const labelTopPad = parseInt(this.settings.widget.labelTopPadding)
+      if (!isNaN(labelTopPad) && labelTopPad > 0) { column.addSpacer(labelTopPad) }
       this.provideText(labelText.toUpperCase(), column, this.format.eventLabel, true)
     }
 
@@ -1410,6 +1412,8 @@ const weatherCal = {
     reminderStack.url = (settingUrl.length > 0) ? settingUrl : "x-apple-reminderkit://REMCDReminder/"
 
     if (reminderSettings.showLabel) {
+      const labelTopPad = parseInt(this.settings.widget.labelTopPadding)
+      if (!isNaN(labelTopPad) && labelTopPad > 0) { reminderStack.addSpacer(labelTopPad) }
       this.provideText((reminderSettings.labelText || labelText || "Reminders").toUpperCase(), reminderStack, this.format.reminderLabel, true)
     }
 
@@ -1606,7 +1610,7 @@ const weatherCal = {
   },
 
   // Display forecast weather.
-  async forecast(column, hourly = false) {
+  async forecast(column, hourly = false, forceHorizontal = false) {
     if (!this.data.weather) { await this.setupWeather() }
     if (!this.data.sun) { await this.setupSunrise() }
     const [locationData, weatherData, sunData, weatherSettings] = [this.data.location, this.data.weather, this.data.sun, this.settings.weather]
@@ -1617,7 +1621,7 @@ const weatherCal = {
     const settingUrl = hourly ? (weatherSettings.urlFuture || "") : (weatherSettings.urlForecast || "")
     weatherStack.url = (settingUrl.length > 0) ? settingUrl : defaultUrl
     
-    const horizontal = hourly ? weatherSettings.horizontalHours : weatherSettings.horizontalForecast
+    const horizontal = forceHorizontal || (hourly ? weatherSettings.horizontalHours : weatherSettings.horizontalForecast)
     const spacing = (weatherSettings.spacing ? parseInt(weatherSettings.spacing) : 0) + (horizontal ? 0 : 5)
     const outsidePadding = this.padding > spacing ? this.padding - spacing : 0
 
@@ -1739,6 +1743,9 @@ const weatherCal = {
   
   // Display an hourly forecast.
   async hourly(column) { await this.forecast(column, true) },
+
+  // Display an hourly forecast in a horizontal layout.
+  async horizontalHourly(column) { await this.forecast(column, true, true) },
 
   // Show the sunrise or sunset time.
   async sunrise(column, forceSunset = false) {
@@ -2190,6 +2197,11 @@ const weatherCal = {
           name: "Custom widget padding",
           type: "multival",
           description: "The padding around the entire widget. By default, these values are blank and Weather Cal uses the item padding to determine these values. Transparent widgets often look best with these values at 0.",
+        },
+        labelTopPadding: {
+          val: "",
+          name: "Extra padding above section labels",
+          description: "Additional space in pixels (positive integer) above section labels (Events, Reminders, etc). Leave blank or 0 for no extra padding.",
         },
         tintIcons: {
           val: this.enum.icons.never,
