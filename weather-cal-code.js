@@ -861,11 +861,22 @@ const weatherCal = {
     }).slice(0,parseInt(eventSettings.numberOfEvents))
   },
 
+  // Read the shortcut reminders file, downloading it from iCloud first if needed.
+  async readShortcutRemindersFile(path) {
+    if (this.fm.isFileStoredIniCloud(path)) { await this.fm.downloadFileFromiCloud(path) }
+    return JSON.parse(this.fm.readString(path))
+  },
+
   // Set up the reminders data object.
   async setupReminders() {
     if (this.settings.reminders.useShortcutReminders && this.fm.fileExists(this.shortcutRemindersPath)) {
-      const raw = JSON.parse(this.fm.readString(this.shortcutRemindersPath))
-      this.data.reminders = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders.numberOfReminders))
+      try {
+        const raw = await this.readShortcutRemindersFile(this.shortcutRemindersPath)
+        this.data.reminders = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders.numberOfReminders))
+      } catch (e) {
+        console.error("Failed to read shortcut reminders, falling back to Reminders app: " + e)
+        this.data.reminders = await this.fetchReminders(this.settings.reminders)
+      }
     } else {
       this.data.reminders = await this.fetchReminders(this.settings.reminders)
     }
@@ -874,8 +885,13 @@ const weatherCal = {
   // Set up the second reminders data object.
   async setupReminders2() {
     if (this.settings.reminders2.useShortcutReminders && this.fm.fileExists(this.shortcutReminders2Path)) {
-      const raw = JSON.parse(this.fm.readString(this.shortcutReminders2Path))
-      this.data.reminders2 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
+      try {
+        const raw = await this.readShortcutRemindersFile(this.shortcutReminders2Path)
+        this.data.reminders2 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
+      } catch (e) {
+        console.error("Failed to read shortcut reminders2, falling back to Reminders app: " + e)
+        this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
+      }
     } else {
       this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
     }
@@ -884,8 +900,13 @@ const weatherCal = {
   // Set up the third reminders data object.
   async setupReminders3() {
     if (this.settings.reminders3.useShortcutReminders && this.fm.fileExists(this.shortcutReminders3Path)) {
-      const raw = JSON.parse(this.fm.readString(this.shortcutReminders3Path))
-      this.data.reminders3 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
+      try {
+        const raw = await this.readShortcutRemindersFile(this.shortcutReminders3Path)
+        this.data.reminders3 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
+      } catch (e) {
+        console.error("Failed to read shortcut reminders3, falling back to Reminders app: " + e)
+        this.data.reminders3 = await this.fetchReminders(this.settings.reminders3)
+      }
     } else {
       this.data.reminders3 = await this.fetchReminders(this.settings.reminders3)
     }
@@ -894,8 +915,13 @@ const weatherCal = {
   // Set up the fourth reminders data object.
   async setupReminders4() {
     if (this.settings.reminders4.useShortcutReminders && this.fm.fileExists(this.shortcutReminders4Path)) {
-      const raw = JSON.parse(this.fm.readString(this.shortcutReminders4Path))
-      this.data.reminders4 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
+      try {
+        const raw = await this.readShortcutRemindersFile(this.shortcutReminders4Path)
+        this.data.reminders4 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
+      } catch (e) {
+        console.error("Failed to read shortcut reminders4, falling back to Reminders app: " + e)
+        this.data.reminders4 = await this.fetchReminders(this.settings.reminders4)
+      }
     } else {
       this.data.reminders4 = await this.fetchReminders(this.settings.reminders4)
     }
@@ -904,8 +930,13 @@ const weatherCal = {
   // Set up the fifth reminders data object.
   async setupReminders5() {
     if (this.settings.reminders5.useShortcutReminders && this.fm.fileExists(this.shortcutReminders5Path)) {
-      const raw = JSON.parse(this.fm.readString(this.shortcutReminders5Path))
-      this.data.reminders5 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
+      try {
+        const raw = await this.readShortcutRemindersFile(this.shortcutReminders5Path)
+        this.data.reminders5 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
+      } catch (e) {
+        console.error("Failed to read shortcut reminders5, falling back to Reminders app: " + e)
+        this.data.reminders5 = await this.fetchReminders(this.settings.reminders5)
+      }
     } else {
       this.data.reminders5 = await this.fetchReminders(this.settings.reminders5)
     }
