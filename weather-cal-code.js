@@ -834,7 +834,10 @@ const weatherCal = {
   async setupReminders() {
     if (this.fm.fileExists(this.shortcutRemindersPath)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutRemindersPath))
-      this.data.reminders = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders.numberOfReminders))
+      let parsed = raw.map(r => this.parseShortcutReminder(r))
+      const { reminders: filtered, tagFiltered } = this.filterShortcutRemindersByTag(parsed, this.settings.reminders)
+      this.data.remindersTagFiltered = tagFiltered
+      this.data.reminders = filtered.slice(0, parseInt(this.settings.reminders.numberOfReminders))
     } else {
       this.data.reminders = await this.fetchReminders(this.settings.reminders)
     }
@@ -844,7 +847,10 @@ const weatherCal = {
   async setupReminders2() {
     if (this.fm.fileExists(this.shortcutReminders2Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders2Path))
-      this.data.reminders2 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders2.numberOfReminders))
+      let parsed = raw.map(r => this.parseShortcutReminder(r))
+      const { reminders: filtered, tagFiltered } = this.filterShortcutRemindersByTag(parsed, this.settings.reminders2)
+      this.data.reminders2TagFiltered = tagFiltered
+      this.data.reminders2 = filtered.slice(0, parseInt(this.settings.reminders2.numberOfReminders))
     } else {
       this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
     }
@@ -854,7 +860,10 @@ const weatherCal = {
   async setupReminders3() {
     if (this.fm.fileExists(this.shortcutReminders3Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders3Path))
-      this.data.reminders3 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders3.numberOfReminders))
+      let parsed = raw.map(r => this.parseShortcutReminder(r))
+      const { reminders: filtered, tagFiltered } = this.filterShortcutRemindersByTag(parsed, this.settings.reminders3)
+      this.data.reminders3TagFiltered = tagFiltered
+      this.data.reminders3 = filtered.slice(0, parseInt(this.settings.reminders3.numberOfReminders))
     } else {
       this.data.reminders3 = await this.fetchReminders(this.settings.reminders3)
     }
@@ -864,7 +873,10 @@ const weatherCal = {
   async setupReminders4() {
     if (this.fm.fileExists(this.shortcutReminders4Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders4Path))
-      this.data.reminders4 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders4.numberOfReminders))
+      let parsed = raw.map(r => this.parseShortcutReminder(r))
+      const { reminders: filtered, tagFiltered } = this.filterShortcutRemindersByTag(parsed, this.settings.reminders4)
+      this.data.reminders4TagFiltered = tagFiltered
+      this.data.reminders4 = filtered.slice(0, parseInt(this.settings.reminders4.numberOfReminders))
     } else {
       this.data.reminders4 = await this.fetchReminders(this.settings.reminders4)
     }
@@ -874,10 +886,28 @@ const weatherCal = {
   async setupReminders5() {
     if (this.fm.fileExists(this.shortcutReminders5Path)) {
       const raw = JSON.parse(this.fm.readString(this.shortcutReminders5Path))
-      this.data.reminders5 = raw.map(r => this.parseShortcutReminder(r)).slice(0, parseInt(this.settings.reminders5.numberOfReminders))
+      let parsed = raw.map(r => this.parseShortcutReminder(r))
+      const { reminders: filtered, tagFiltered } = this.filterShortcutRemindersByTag(parsed, this.settings.reminders5)
+      this.data.reminders5TagFiltered = tagFiltered
+      this.data.reminders5 = filtered.slice(0, parseInt(this.settings.reminders5.numberOfReminders))
     } else {
       this.data.reminders5 = await this.fetchReminders(this.settings.reminders5)
     }
+  },
+
+  // Filter shortcut reminders by tag if filterByTag is set. Returns filtered list and whether tag filtering was applied.
+  filterShortcutRemindersByTag(reminders, reminderSettings) {
+    if (reminderSettings.filterByTag && reminderSettings.filterByTag.trim().length > 0) {
+      const tags = reminderSettings.filterByTag.split(",").map(t => t.trim().toLowerCase().replace(/^#/, ""))
+      return {
+        reminders: reminders.filter(r => {
+          const reminderTags = (r.tags || []).map(t => (typeof t === "string" ? t : (t.name || "")).toLowerCase().replace(/^#/, ""))
+          return tags.some(tag => reminderTags.includes(tag))
+        }),
+        tagFiltered: true,
+      }
+    }
+    return { reminders, tagFiltered: false }
   },
 
   // Convert a plain reminder object received from Shortcuts into the shape renderReminders expects.
@@ -1301,35 +1331,35 @@ const weatherCal = {
   // Display reminders on the widget.
   async reminders(column) {
     if (!this.data.reminders) { await this.setupReminders() }
-    await this.renderReminders(column, this.settings.reminders, this.data.reminders, this.localization.remindersLabel)
+    await this.renderReminders(column, this.settings.reminders, this.data.reminders, this.localization.remindersLabel, this.data.remindersTagFiltered)
   },
 
   // Display a second set of reminders (with separate list/tag settings) on the widget.
   async reminders2(column) {
     if (!this.data.reminders2) { await this.setupReminders2() }
-    await this.renderReminders(column, this.settings.reminders2, this.data.reminders2, this.localization.reminders2Label)
+    await this.renderReminders(column, this.settings.reminders2, this.data.reminders2, this.localization.reminders2Label, this.data.reminders2TagFiltered)
   },
 
   // Display a third set of reminders (with separate list/tag settings) on the widget.
   async reminders3(column) {
     if (!this.data.reminders3) { await this.setupReminders3() }
-    await this.renderReminders(column, this.settings.reminders3, this.data.reminders3, this.localization.reminders3Label)
+    await this.renderReminders(column, this.settings.reminders3, this.data.reminders3, this.localization.reminders3Label, this.data.reminders3TagFiltered)
   },
 
   // Display a fourth set of reminders (with separate list/tag settings) on the widget.
   async reminders4(column) {
     if (!this.data.reminders4) { await this.setupReminders4() }
-    await this.renderReminders(column, this.settings.reminders4, this.data.reminders4, this.localization.reminders4Label)
+    await this.renderReminders(column, this.settings.reminders4, this.data.reminders4, this.localization.reminders4Label, this.data.reminders4TagFiltered)
   },
 
   // Display a fifth set of reminders (with separate list/tag settings) on the widget.
   async reminders5(column) {
     if (!this.data.reminders5) { await this.setupReminders5() }
-    await this.renderReminders(column, this.settings.reminders5, this.data.reminders5, this.localization.reminders5Label)
+    await this.renderReminders(column, this.settings.reminders5, this.data.reminders5, this.localization.reminders5Label, this.data.reminders5TagFiltered)
   },
 
   // Shared rendering logic for a reminders list on the widget.
-  async renderReminders(column, reminderSettings, reminderData, labelText) {
+  async renderReminders(column, reminderSettings, reminderData, labelText, fromShortcutsWithTagFilter = false) {
     if (reminderData.length == 0) {
       if (reminderSettings.noRemindersBehavior == "message" && this.localization.noRemindersMessage.length) { return this.provideText(this.localization.noRemindersMessage, column, this.format.noReminders, true) }
       if (this[reminderSettings.noRemindersBehavior]) { return await this[reminderSettings.noRemindersBehavior](column) }
@@ -1373,7 +1403,7 @@ const weatherCal = {
 
       if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "ff3b30") }
       const sectionDateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
-      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue"
+      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue" || fromShortcutsWithTagFilter
       if (reminder.isOverdue || !reminder.dueDate || dueDateRedundant) { continue }
 
       let timeText
