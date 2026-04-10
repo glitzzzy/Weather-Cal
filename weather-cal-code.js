@@ -22,6 +22,7 @@ const weatherCal = {
     this.shortcutReminders3Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders3-" + name)
     this.shortcutReminders4Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders4-" + name)
     this.shortcutReminders5Path = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-reminders5-" + name)
+    this.shortcutDebugPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-shortcut-debug-" + name)
     this.widgetUrl = "https://raw.githubusercontent.com/glitzzzy/Weather-Cal/main/weather-cal.js"
     this.now = new Date()
     this.data = {}
@@ -160,7 +161,7 @@ const weatherCal = {
     }
 
     if (response == menu.other) {
-      const otherOptions = ["Re-enter API key", "Completely reset widget", "Exit"]
+      const otherOptions = ["Re-enter API key", "Completely reset widget", "View shortcut debug info", "Exit"]
       const otherResponse = await this.generateAlert("Other settings",otherOptions)
     
       // Set the API key.
@@ -182,6 +183,16 @@ const weatherCal = {
           const success = await this.downloadCode(this.name, this.widgetUrl)
           const message = success ? "This script has been reset. Close the script and reopen it for the change to take effect." : "The reset failed."
           await this.generateAlert(message)
+        }
+      }
+
+      // View shortcut debug info.
+      else if (otherResponse == 2) {
+        if (this.fm.fileExists(this.shortcutDebugPath)) {
+          const debugText = this.fm.readString(this.shortcutDebugPath)
+          await QuickLook.present(debugText)
+        } else {
+          await this.generateAlert("No shortcut debug info found. Run the script from Shortcuts first, then come back here to view the debug log.", ["OK"])
         }
       }
     }
@@ -540,26 +551,46 @@ const weatherCal = {
     // If invoked from Shortcuts with a reminder list, persist it for widget refreshes.
     const shortcutParam = args.shortcutParameter
     if (shortcutParam) {
+      const debugEntry = {
+        timestamp: new Date().toISOString(),
+        receivedType: Array.isArray(shortcutParam) ? "array" : (shortcutParam === null ? "null" : typeof shortcutParam),
+        rawValue: (typeof shortcutParam === "string") ? shortcutParam : JSON.stringify(shortcutParam),
+        parseError: null,
+        savedKeys: [],
+      }
       try {
-        const parsed = JSON.parse(shortcutParam)
+        // Shortcuts may pass a Dictionary (already a JS object) or a text string containing JSON.
+        const parsed = (typeof shortcutParam === "string") ? JSON.parse(shortcutParam) : shortcutParam
+        debugEntry.parsedValue = JSON.stringify(parsed)
         if (Array.isArray(parsed)) {
           this.fm.writeString(this.shortcutRemindersPath, JSON.stringify(parsed))
+          debugEntry.savedKeys.push("reminders")
         } else if (parsed && Array.isArray(parsed.reminders)) {
           this.fm.writeString(this.shortcutRemindersPath, JSON.stringify(parsed.reminders))
+          debugEntry.savedKeys.push("reminders")
           if (Array.isArray(parsed.reminders2)) {
             this.fm.writeString(this.shortcutReminders2Path, JSON.stringify(parsed.reminders2))
+            debugEntry.savedKeys.push("reminders2")
           }
           if (Array.isArray(parsed.reminders3)) {
             this.fm.writeString(this.shortcutReminders3Path, JSON.stringify(parsed.reminders3))
+            debugEntry.savedKeys.push("reminders3")
           }
           if (Array.isArray(parsed.reminders4)) {
             this.fm.writeString(this.shortcutReminders4Path, JSON.stringify(parsed.reminders4))
+            debugEntry.savedKeys.push("reminders4")
           }
           if (Array.isArray(parsed.reminders5)) {
             this.fm.writeString(this.shortcutReminders5Path, JSON.stringify(parsed.reminders5))
+            debugEntry.savedKeys.push("reminders5")
           }
+        } else {
+          debugEntry.parseError = "Parsed value was not an array and had no recognized 'reminders' key. Keys found: " + (parsed && typeof parsed === "object" ? Object.keys(parsed).join(", ") : "none")
         }
-      } catch (e) {}
+      } catch (e) {
+        debugEntry.parseError = String(e)
+      }
+      this.fm.writeString(this.shortcutDebugPath, JSON.stringify(debugEntry, null, 2))
     }
 
     // Determine if we're using the old or new setup.
