@@ -559,6 +559,10 @@ const weatherCal = {
         savedKeys: [],
       }
       try {
+        // Clear all previously cached shortcut reminder files so stale data never persists.
+        const allReminderPaths = [this.shortcutRemindersPath, this.shortcutReminders2Path, this.shortcutReminders3Path, this.shortcutReminders4Path, this.shortcutReminders5Path]
+        for (const p of allReminderPaths) { if (this.fm.fileExists(p)) this.fm.remove(p) }
+
         // Shortcuts may pass a Dictionary (already a JS object) or a text string containing JSON.
         const parsed = (typeof shortcutParam === "string") ? JSON.parse(shortcutParam) : shortcutParam
         debugEntry.parsedValue = JSON.stringify(parsed)
