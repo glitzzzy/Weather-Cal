@@ -810,14 +810,19 @@ const weatherCal = {
     this.data.reminders2 = await this.fetchReminders(this.settings.reminders2)
   },
 
+async function debugNotify(message) {
+  const n = new Notification()
+  n.title = "WeatherCal Debug"
+  n.body = message
+  await n.schedule()
+}
+
   // Fetch and filter reminders according to the given reminder settings object.
   async fetchReminders(reminderSettings) {
     let listSetting = reminderSettings.selectLists
     let lists
     
-    for (let r of reminders) {
-  console.log(r.title, r.tags)
-}
+    for (let r of reminders) await debugNotify(`${r.title} | tags: ${JSON.stringify(r.tags)}`)
 
     // Old, manually-entered comma lists.
     if (typeof listSetting == "string") {
