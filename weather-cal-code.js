@@ -2376,7 +2376,7 @@ const weatherCal = {
 			val: "",
 			name: "URL to open when tapped",
 			description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Calendar app.",
-		},		
+        },		
       },
       events: {
         name: "Events",
@@ -2574,11 +2574,11 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
-		overdueColor: {
-			val: "ff3b30",
-			name: "Overdue Color",
-			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
-		},
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
@@ -2656,11 +2656,11 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
-		overdueColor: {
-			val: "ff3b30",
-			name: "Overdue Color",
-			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
-		},
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
@@ -2738,11 +2738,11 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
-		overdueColor: {
-			val: "ff3b30",
-			name: "Overdue Color",
-			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
-		},
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
@@ -2820,11 +2820,11 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
-		overdueColor: {
-			val: "ff3b30",
-			name: "Overdue Color",
-			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
-		},
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
@@ -2902,11 +2902,11 @@ const weatherCal = {
           name: "Show overdue reminders",
           type: "bool",
         },
-		overdueColor: {
-			val: "ff3b30",
-			name: "Overdue Color",
-			description: "The hex code color value for overdue reminders. Leave blank for the default red.",
-		},
+        overdueColor: {
+          val: "ff3b30",
+          name: "Overdue Color",
+          description: "The hex code color value for overdue reminders. Leave blank for the default red.",
+        },
         todayOnly: {
           val: false,
           name: "Hide reminders due after today",
