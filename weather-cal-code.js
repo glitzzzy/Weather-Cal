@@ -1443,7 +1443,7 @@ const weatherCal = {
         colorItem.textColor = reminder.calendar.color
       }
 
-      if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "ff3b30") }
+      if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "E85D75") }
       const sectionDateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
       const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue"
       if (!reminder.dueDate || reminder.isOverdue || reminderSettings.showDates === false || dueDateRedundant) { continue }

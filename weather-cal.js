@@ -72,7 +72,7 @@ const custom = {
 
 // Run the initial setup or settings menu.
 let preview
-if (config.runsInApp) {
+if (config.runsInApp && !args.shortcutParameter) {
   preview = await code.runSetup(Script.name(), iCloudInUse, codeFilename, gitHubUrl)
   if (!preview) return
 }
@@ -82,7 +82,7 @@ const widget = await code.createWidget(layout, Script.name(), iCloudInUse, custo
 Script.setWidget(widget)
 
 // If we're in app, display the preview.
-if (config.runsInApp) {
+if (config.runsInApp && preview) {
   if (preview == "small") { await widget.presentSmall() }
   else if (preview == "medium") { await widget.presentMedium() }
   else { await widget.presentLarge() }
