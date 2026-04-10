@@ -1810,7 +1810,8 @@ const weatherCal = {
 
     stack.addSpacer(this.padding)
 
-    this.provideText(this.localization.feelsLikeLabel + ": " + this.displayNumber(weatherData.feelsLike,"--") + "°", stack, this.format.smallTemp)
+    const feelsLikePrefix = this.settings.weather.showFeelsLikeLabel ? this.localization.feelsLikeLabel + ": " : ""
+    this.provideText(feelsLikePrefix + this.displayNumber(weatherData.feelsLike,"--") + "°", stack, this.format.smallTemp)
   },
 
   // Display the current dew point.
@@ -1831,7 +1832,8 @@ const weatherCal = {
 
     stack.addSpacer(this.padding)
 
-    this.provideText(this.localization.dewPointLabel + ": " + this.displayNumber(weatherData.dewPoint,"--") + "°", stack, this.format.smallTemp)
+    const dewPointPrefix = this.settings.weather.showDewPointLabel ? this.localization.dewPointLabel + ": " : ""
+    this.provideText(dewPointPrefix + this.displayNumber(weatherData.dewPoint,"--") + "°", stack, this.format.smallTemp)
   },
 
   // Display the current chance of rain.
@@ -1873,7 +1875,8 @@ const weatherCal = {
 
     stack.addSpacer(this.padding)
 
-    this.provideText(this.localization.uvIndexLabel + ": " + this.displayNumber(weatherData.uvIndex,"--"), stack, this.format.smallTemp)
+    const uvIndexPrefix = this.settings.weather.showUvIndexLabel ? this.localization.uvIndexLabel + ": " : ""
+    this.provideText(uvIndexPrefix + this.displayNumber(weatherData.uvIndex,"--"), stack, this.format.smallTemp)
   },
   
   // Display COVID info on the widget.
@@ -3219,6 +3222,24 @@ const weatherCal = {
         showRain: {
           val: false,
           name: "Show percent chance of rain",
+          type: "bool",
+        },
+        showFeelsLikeLabel: {
+          val: true,
+          name: "Show label for the feels like temperature",
+          description: "Set to false to hide the 'Feels like' text label and show only the value.",
+          type: "bool",
+        },
+        showDewPointLabel: {
+          val: true,
+          name: "Show label for the dew point",
+          description: "Set to false to hide the 'Dew point' text label and show only the value.",
+          type: "bool",
+        },
+        showUvIndexLabel: {
+          val: true,
+          name: "Show label for the UV index",
+          description: "Set to false to hide the 'UV index' text label and show only the value.",
           type: "bool",
         },
         tomorrowShownAtHour: {
