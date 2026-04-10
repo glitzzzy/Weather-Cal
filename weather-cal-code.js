@@ -1395,6 +1395,7 @@ const weatherCal = {
     if (reminderData.length == 0) {
       if (reminderSettings.noRemindersBehavior == "message" && this.localization.noRemindersMessage.length) { return this.provideText(this.localization.noRemindersMessage, column, this.format.noReminders, true) }
       if (this[reminderSettings.noRemindersBehavior]) { return await this[reminderSettings.noRemindersBehavior](column) }
+      return
     }
 
     const reminderStack = column.addStack()
