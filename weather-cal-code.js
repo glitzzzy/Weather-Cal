@@ -1499,9 +1499,11 @@ const weatherCal = {
     if (weatherSettings.showLocation) { this.provideText(locationData.locality, currentWeatherStack, this.format.smallTemp, true) }
 
     const mainConditionStack = this.align(currentWeatherStack)
-    const mainCondition = mainConditionStack.addImage(this.provideConditionSymbol(weatherData.currentCondition,this.isNight(this.now)))
-    mainCondition.imageSize = new Size(22,22) // TODO: Adjustable size
-    this.tintIcon(mainCondition, this.format.largeTemp)
+    if (weatherSettings.showConditionIcon !== false) {
+      const mainCondition = mainConditionStack.addImage(this.provideConditionSymbol(weatherData.currentCondition,this.isNight(this.now)))
+      mainCondition.imageSize = new Size(22,22) // TODO: Adjustable size
+      this.tintIcon(mainCondition, this.format.largeTemp)
+    }
     mainConditionStack.setPadding(weatherSettings.showLocation ? 0 : this.padding, this.padding, 0, this.padding)
     
     const tempText = this.displayNumber(weatherData.currentTemp,"--") + "°"
@@ -3192,6 +3194,11 @@ const weatherCal = {
         showLocation: {
           val: false,
           name: "Show location name",
+          type: "bool",
+        },
+        showConditionIcon: {
+          val: true,
+          name: "Show the weather condition icon above the current temperature",
           type: "bool",
         },
         horizontalCondition: {
