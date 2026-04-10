@@ -1265,8 +1265,9 @@ const weatherCal = {
       }
 
       if (reminder.isOverdue) { title.textColor = new Color(reminderSettings.overdueColor || "ff3b30") }
-      const sectionDateFilter = (reminderSettings.dueDateFilter != null && reminderSettings.dueDateFilter !== "") ? reminderSettings.dueDateFilter : (reminderSettings.todayOnly ? "today" : "all")
-      if (reminder.isOverdue || !reminder.dueDate || sectionDateFilter === "today" || sectionDateFilter === "overdue") { continue }
+      const sectionDateFilter = reminderSettings.dueDateFilter || (reminderSettings.todayOnly ? "today" : "all")
+      const dueDateRedundant = sectionDateFilter === "today" || sectionDateFilter === "overdue"
+      if (reminder.isOverdue || !reminder.dueDate || dueDateRedundant) { continue }
 
       let timeText
       if (reminderSettings.useRelativeDueDate) {
