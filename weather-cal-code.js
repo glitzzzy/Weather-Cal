@@ -681,6 +681,7 @@ const weatherCal = {
     this.usingASCII = undefined
     this.currentColumns = []
     this.rowNeedsSetup = false
+    this.lastSectionWasEmpty = false
 
     for (rawLine of this.settings.layout.split(/\r?\n/)) { 
       const line = rawLine.trim()
@@ -777,7 +778,8 @@ const weatherCal = {
   },
 
   // Adds a space, with an optional amount.
-  space(input, parameter) { 
+  space(input, parameter) {
+    if (this.lastSectionWasEmpty) { this.lastSectionWasEmpty = false; return }
     if (parameter) input.addSpacer(parseInt(parameter))
     else input.addSpacer()
   },
@@ -1395,8 +1397,10 @@ const weatherCal = {
     if (reminderData.length == 0) {
       if (reminderSettings.noRemindersBehavior == "message" && this.localization.noRemindersMessage.length) { return this.provideText(this.localization.noRemindersMessage, column, this.format.noReminders, true) }
       if (this[reminderSettings.noRemindersBehavior]) { return await this[reminderSettings.noRemindersBehavior](column) }
+      this.lastSectionWasEmpty = true
       return
     }
+    this.lastSectionWasEmpty = false
 
     const reminderStack = column.addStack()
     reminderStack.layoutVertically()
